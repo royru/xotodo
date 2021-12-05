@@ -1,0 +1,19 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+      {
+          "name": "Launch Firefox debugging",
+          "type": "firefox",
+          "request": "launch",
+          "reAttach": true,
+          "url": "http://localhost:8000",
+          "pathMappings": [{
+            "url": "http://localhost",
+            "path": "${workspaceFolder}/web"
+          }],
+          "reloadOnChange": {
+            "watch": [ "${workspaceFolder}/web/*.js", "${workspaceFolder}/web/*.css" ],
+          }
+      }
+  ]
+}
