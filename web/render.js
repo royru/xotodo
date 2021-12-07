@@ -1,11 +1,13 @@
 const body = document.querySelector('body')
 
-export function renderTodos(todos) {
+export function renderOpenTodos(todos) {
   console.log(todos)
   body.innerHTML = ''
-  for (const [contextPath, todoList] of todos) {
+  for (const [_, todoList] of todos) {
     for (const todo of todoList) {
-      body.appendChild(div(span(contextPath, 'context-path'), span(todo.title, 'text')))
+      if (todo.status == 'open') {
+        body.appendChild(div(span(todo.shortPath, 'context-path'), span(todo.title, 'text')))
+      }
     }
   }
 }
@@ -24,6 +26,3 @@ function span(text, className = '') {
   n.className = className
   return n
 }
-
-
-// XTODO: sdf this is not 

@@ -1,7 +1,6 @@
 # XOTODO
 
 ## Run
-
 ```
 deno run --allow-read --allow-net --unstable --watch main.ts
 ```
@@ -11,9 +10,11 @@ deno run --allow-read --allow-net --unstable --watch main.ts
 deno compile --allow-read --allow-net --unstable main.ts
 ```
 
-## Debug in Firefox
+Currently doesn't work: https://github.com/denoland/deno/issues/10693
 
+## Debug in Firefox
 ``` 
 Applications/Firefox.app/Contents/MacOS/firefox -start-debugger-server
 ```
-Then use the debugger in VS Code
+
+Next, use the debugger in VS Code

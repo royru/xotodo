@@ -12,8 +12,8 @@ async function handleRequest(request: Request): Promise<Response> {
     const { socket, response } = Deno.upgradeWebSocket(request)
     websocket = socket
     socket.onopen = () => socket.send(JSON.stringify(Array.from(todoMap.entries())))
-    socket.onmessage = (e) => {
-      // console.log("socket message:", e.data)
+    socket.onmessage = (e: MessageEvent) => {
+      console.log("socket message:", e.data)
     }
     socket.onerror = (e) => console.log("socket errored:", e)
     socket.onclose = () => console.log("socket closed")
