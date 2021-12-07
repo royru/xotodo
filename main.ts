@@ -2,6 +2,7 @@ import { Todo, watch } from "./watcher.ts"
 import { serve } from "https://deno.land/std@0.114.0/http/server.ts"
 
 let websocket: WebSocket
+const todoMap = new Map<string, Todo[]>()
 
 async function handleRequest(request: Request): Promise<Response> {
   //   body += request.headers.get("user-agent") || "Unknown"
@@ -11,54 +12,41 @@ async function handleRequest(request: Request): Promise<Response> {
   if (upgrade.toLowerCase() == "websocket") {
     const { socket, response } = Deno.upgradeWebSocket(request)
     websocket = socket
+
     socket.onopen = () => socket.send(JSON.stringify(Array.from(todoMap.entries())))
-    socket.onmessage = (e: MessageEvent) => {
-      console.log("socket message:", e.data)
-    }
     socket.onerror = (e) => console.log("socket errored:", e)
     socket.onclose = () => console.log("socket closed")
+
+    socket.onmessage = (e: MessageEvent) => {
+      const todo: Todo = JSON.parse(e.data)
+      Deno.run({ cmd: ["open", todo.filePath] })
+    }
+
     return response
   }
 
-  // This is how the server works:
-  // 1. A request comes in for a specific asset.
-  // 2. We read the asset from the file system.
-  // 3. We send the asset back to the client.
-
   // Check if the request is for style.css.
   if (pathname.startsWith("/style.css")) {
-
-    // Read the style.css file from the file system.
     const file = await Deno.readFile("./web/style.css")
-    // Respond to the request with the style.css file.
     return new Response(file, {
-      headers: {
-        "content-type": "text/css",
-      },
+      headers: { "content-type": "text/css" },
     })
   }
 
   if (pathname.endsWith(".js")) {
-
-    // Read the style.css file from the file system.
     const file = await Deno.readFile(`./web/${pathname}`)
-    // Respond to the request with the style.css file.
     return new Response(file, {
-      headers: {
-        "content-type": "application/javascript",
-      },
+      headers: { "content-type": "application/javascript" },
     })
   }
-
 
   return new Response(
     `<html>
     <head>
-    <link rel="stylesheet" href="style.css" />
-    <script type="module" src="index.js"></script>
+      <link rel="stylesheet" href="style.css" />
+      <script type="module" src="index.js"></script>
     </head>
-    <body>  
-    </body>
+    <body></body>
     </html>`,
     {
       headers: {
@@ -67,15 +55,6 @@ async function handleRequest(request: Request): Promise<Response> {
     },
   )
 }
-
-const todoMap = new Map<string, Todo[]>()
-
-console.log("Listening on http://localhost:8000")
-serve(handleRequest)
-
-// import { colors, Table, tty } from "./deps.ts"
-// import { prompt, Input, Number, Confirm, Checkbox } from "./deps.ts"
-// localStorage.clear()
 
 function onUpdate() {
   todoMap.clear()
@@ -93,7 +72,9 @@ function onUpdate() {
   }
 }
 
-watch(onUpdate)
-
 // start
+serve(handleRequest)
+watch(onUpdate)
 onUpdate()
+
+console.log("Listening on http://localhost:8000")

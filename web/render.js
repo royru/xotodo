@@ -1,3 +1,4 @@
+import { sendTodoOpened } from './socket.js'
 const body = document.querySelector('body')
 
 export function renderOpenTodos(todos) {
@@ -6,7 +7,9 @@ export function renderOpenTodos(todos) {
   for (const [_, todoList] of todos) {
     for (const todo of todoList) {
       if (todo.status == 'open') {
-        body.appendChild(div(span(todo.shortPath, 'context-path'), span(todo.title, 'text')))
+        const pathNode = span(todo.shortPath, 'context-path')
+        pathNode.addEventListener('click', () => sendTodoOpened(todo))
+        body.appendChild(div(pathNode, span(todo.title, 'text')))
       }
     }
   }
