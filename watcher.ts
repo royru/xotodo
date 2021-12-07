@@ -60,6 +60,10 @@ function parseFile(text: string, filePath: string, onUpdate: () => void) {
   if (todos.length > 0) {
     localStorage.setItem(filePath, JSON.stringify(openTodos.concat(closedTodos)))
     onUpdate()
+  } else if (localStorage.getItem(filePath)) {
+    // here, we previously had todos, but now we don't
+    localStorage.removeItem(filePath)
+    onUpdate()
   }
 }
 
