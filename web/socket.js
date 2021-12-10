@@ -1,5 +1,7 @@
 let socket
 
+//OTODO: handling socket disconnects
+
 export function startSocket(onTodosReceived) {
 
   // Create WebSocket connection.

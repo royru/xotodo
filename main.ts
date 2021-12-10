@@ -19,7 +19,7 @@ async function handleRequest(request: Request): Promise<Response> {
 
     socket.onmessage = (e: MessageEvent) => {
       const todo: Todo = JSON.parse(e.data)
-      Deno.run({ cmd: ["open", todo.filePath] })
+      Deno.run({ cmd: ["code", "-g", `${todo.filePath}:${todo.lineNumber || 0}`] })
     }
 
     return response
