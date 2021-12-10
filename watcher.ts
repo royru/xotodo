@@ -1,9 +1,15 @@
 import { exists } from "https://deno.land/std/fs/mod.ts"
 import { v1 } from "https://deno.land/std@0.91.0/uuid/mod.ts"
 
-const WATCHED_FOLDERS = ["/Volumes/Google Drive/My Drive/Research", "/Users/roy"]
+const WATCHED_FOLDERS = ["/Volumes/GoogleDrive/My Drive/Research", "/Users/roy"]
+const IGNORED_PATH_SEGMENTS = ["xotodo", "/Library", ".webpack", ".seafile-data"]
 
-// localStorage.clear()
+// cleanup in case the any new ignored path segment was added
+for (const path of Object.keys({ ...localStorage })) {
+  if (IGNORED_PATH_SEGMENTS.some(segment => path.includes(segment))) {
+    localStorage.removeItem(path)
+  }
+}
 
 export interface Todo {
   title: string
@@ -25,8 +31,8 @@ export async function watch(onUpdate: () => void) {
 
     for (const path of event.paths) {
 
-      if (path.includes('xotodo') || path.includes('/Library/') || path.includes('.webpack')) {
-        // ignore 
+      if (IGNORED_PATH_SEGMENTS.some(segment => path.includes(segment))) {
+        // ignore
         continue
       }
 
