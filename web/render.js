@@ -12,8 +12,17 @@ export function renderOpenTodos(todos) {
       if (todo.status == 'open') {
         const pathNode = span(`@${todo.lineNumber}`, 'line-number')
         pathNode.addEventListener('click', () => sendTodoOpened(todo))
+
+        // due date
+        let cls = "due-soon"
+        console.log(getDateStr(new Date(todo.dueDate)), getDateStr(new Date()))
+        if (getDateStr(new Date(todo.dueDate)) == getDateStr(new Date())) {
+          cls = "due-today"
+        } else if (getDateStr(new Date(todo.dueDate)) < getDateStr(new Date())) {
+          cls = "overdue"
+        }
         const dateStr = todo.dueDate ? new Date(todo.dueDate).toDateString() : ''
-        body.appendChild(div(pathNode, span(todo.title, 'text'), span(dateStr, 'due')))
+        body.appendChild(div(pathNode, span(todo.title, 'text'), span(dateStr, cls)))
       }
     }
   }
@@ -38,4 +47,8 @@ function h3(text) {
   const n = document.createElement('h3')
   n.textContent = text
   return n
+}
+
+function getDateStr(d) {
+  return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`
 }

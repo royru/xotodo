@@ -21,7 +21,17 @@ div span.line-number {
   cursor: pointer;
 }
 
-.due {
+.overdue {
   font-weight: bold;
   color: red;
+}
+
+.due-soon {
+  font-weight: bold;
+  color: green;
+}
+
+.due-today {
+  font-weight: bold;
+  color: blue;
 }
