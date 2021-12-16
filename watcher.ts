@@ -12,11 +12,41 @@ export interface Todo {
   dueDate?: Date
 }
 
-
-const WATCHED_FOLDERS = ["/Volumes/Google Drive/My Drive/Research", "/Volumes/GoogleDrive/My Drive/Research", "/Users/roy"]
-const IGNORED_PATH_SEGMENTS = ["xotodo", "/Library", ".webpack", ".seafile-data", ".git"]
-
 type NumberedLine = [lineNumber: number, line: string]
+
+let currentGoogleDrivePath = ''
+setTimeout(checkGoogleDrivePath, 60 * 1000)
+// initial check
+await checkGoogleDrivePath()
+
+// check which google drive path exists at the moment
+async function checkGoogleDrivePath() {
+  if (await exists('/Volumes/GoogleDrive')) {
+    currentGoogleDrivePath = '/Volumes/GoogleDrive'
+  } else if (await exists('/Volumes/Google Drive')) {
+    currentGoogleDrivePath = '/Volumes/Google Drive'
+  } else {
+    throw new Error('No Google Drive found')
+  }
+}
+
+// checks for both possible locations: "/Volumes/GoogleDrive" and "/Volumes/Google Drive"
+function googleDriveVolumeFix(path: string): string {
+  if (path.includes('/Volumes/GoogleDrive')) {
+    return path.replace('/Volumes/GoogleDrive', currentGoogleDrivePath)
+  } else if (path.includes('/Volumes/Google Drive')) {
+    return path.replace('/Volumes/Google Drive', currentGoogleDrivePath)
+  } else {
+    return path
+  }
+}
+
+function existsFixed(path: string): Promise<boolean> {
+  return exists(googleDriveVolumeFix(path))
+}
+
+const WATCHED_FOLDERS = [`${currentGoogleDrivePath}/My Drive/Research`, "/Users/roy"]
+const IGNORED_PATH_SEGMENTS = ["xotodo", "/Library", ".webpack", ".seafile-data", ".git"]
 
 // cleanup in case the any new ignored path segment was added
 for (const path of Object.keys({ ...localStorage })) {
@@ -24,44 +54,49 @@ for (const path of Object.keys({ ...localStorage })) {
     console.log(`removing ignored path: ${path}`)
     localStorage.removeItem(path)
   }
-  else if (! await exists(path)) {
+  else if (! await existsFixed(path)) {
     console.log(`removing non-existing path: ${path}`)
     localStorage.removeItem(path)
   }
 }
 
 export async function watch(onUpdate: () => void) {
-  const decoder = new TextDecoder("utf-8")
-  const watcher = Deno.watchFs(WATCHED_FOLDERS)
+  try {
+    const decoder = new TextDecoder("utf-8")
+    const watcher = Deno.watchFs(WATCHED_FOLDERS)
 
-  for await (const event of watcher) {
-    if (event.paths.length == 0) {
-      continue
-    }
+    for await (const event of watcher) {
 
-    for (const path of event.paths) {
-      if (IGNORED_PATH_SEGMENTS.some(segment => path.includes(segment))) {
-        // ignore
+      if (event.paths.length == 0) {
         continue
       }
 
-      if (!await exists(path)) {
-        if (localStorage.getItem(path) !== null) {
-          localStorage.removeItem(path)
-          onUpdate()
+      for (const path of event.paths) {
+        if (IGNORED_PATH_SEGMENTS.some(segment => path.includes(segment))) {
+          // ignore
+          continue
         }
-        continue
-      }
 
-      try {
-        const data = await Deno.readFile(path)
-        const text = decoder.decode(data)
-        console.log("parsing", path)
-        parseFile(text, path, onUpdate)
-      } catch (error) {
-        console.error(error.message)
+        if (!await existsFixed(path)) {
+          if (localStorage.getItem(path) !== null) {
+            localStorage.removeItem(path)
+            onUpdate()
+          }
+          continue
+        }
+
+        try {
+          const data = await Deno.readFile(path)
+          const text = decoder.decode(data)
+          console.log("parsing", path)
+          parseFile(text, path, onUpdate)
+        } catch (_) {
+          console.log("parsing failed")
+        }
       }
     }
+  } catch (error) {
+    console.error(error)
   }
 }
 
