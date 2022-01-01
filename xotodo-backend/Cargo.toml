@@ -1,0 +1,18 @@
+[package]
+name = "xotodo-backend"
+version = "0.1.0"
+edition = "2021"
+authors= ["Roy Rutishauser <roy.rutishauser@gmail.com>"]
+description = "xotodo backend"
+license = "MIT/Apache-2.0"
+repository = "https://github.com/royru/xotodo"
+
+[lib]
+crate-type = ["cdylib"]
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[dependencies]
+wasm-bindgen = { version = "0.2", features = ["serde-serialize"] }
+regex = "1.5.4"
+lazy_static = "1.4.0"
+serde = { version = "1.0", features = ["derive"] }

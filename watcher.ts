@@ -1,18 +1,5 @@
 import { exists } from "https://deno.land/std/fs/mod.ts"
-import { v1 } from "https://deno.land/std@0.91.0/uuid/mod.ts"
-
-export interface Todo {
-  title: string
-  status: 'open' | 'closed' | 'removed'
-  id: string
-  tsIndexed: Date
-  filePath: string
-  shortPath: string
-  lineNumber: number
-  dueDate?: Date
-}
-
-type NumberedLine = [lineNumber: number, line: string]
+import { parseFile } from "./file-parser.ts"
 
 let currentGoogleDrivePath = ''
 setTimeout(checkGoogleDrivePath, 60 * 1000)
@@ -46,7 +33,7 @@ function existsFixed(path: string): Promise<boolean> {
 }
 
 const WATCHED_FOLDERS = [`${currentGoogleDrivePath}/My Drive/Research`, "/Users/roy"]
-const IGNORED_PATH_SEGMENTS = ["xotodo", "/Library", ".webpack", ".seafile-data", ".git"]
+const IGNORED_PATH_SEGMENTS = ["/xotodo", "/Library", "/."]
 
 // cleanup in case the any new ignored path segment was added
 for (const path of Object.keys({ ...localStorage })) {
@@ -89,7 +76,24 @@ export async function watch(onUpdate: () => void) {
           const data = await Deno.readFile(path)
           const text = decoder.decode(data)
           console.log("parsing", path)
-          parseFile(text, path, onUpdate)
+          const todos = parseFile(text)
+
+          WATCHED_FOLDERS.forEach((dir: string) => {
+            todos.forEach(t => {
+              t.filePath = path
+              t.shortPath = path.replace(dir, '')
+            })
+          })
+
+          if (todos.length > 0) {
+            localStorage.setItem(path, JSON.stringify(todos))
+            onUpdate()
+          } else if (localStorage.getItem(path)) {
+            // here, we previously had todos, but now we don't
+            localStorage.removeItem(path)
+            onUpdate()
+          }
+
         } catch (_) {
           console.log("parsing failed")
         }
@@ -98,48 +102,4 @@ export async function watch(onUpdate: () => void) {
   } catch (error) {
     console.error(error)
   }
-}
-
-function parseFile(text: string, filePath: string, onUpdate: () => void) {
-  const numberedLines = text.split('\n').map((l, i) => [i, l] as NumberedLine)
-  const openTodoLines = numberedLines.filter(nl => nl[1].includes('OTODO: '))
-  const openTodos = parseTodoLinesWith(openTodoLines, filePath, /^(.*)(OTODO: )(.*)/, 'open')
-  const closedTodoLines = numberedLines.filter(nl => nl[1].includes('XTODO: '))
-  const closedTodos = parseTodoLinesWith(closedTodoLines, filePath, /^(.*)(XTODO: )(.*)/, 'closed')
-  const todos = openTodos.concat(closedTodos)
-  if (todos.length > 0) {
-    localStorage.setItem(filePath, JSON.stringify(openTodos.concat(closedTodos)))
-    onUpdate()
-  } else if (localStorage.getItem(filePath)) {
-    // here, we previously had todos, but now we don't
-    localStorage.removeItem(filePath)
-    onUpdate()
-  }
-}
-
-function parseTodoLinesWith(lines: NumberedLine[], filePath: string, regex: RegExp, status: 'open' | 'closed' | 'removed'): Todo[] {
-  const numberedTodoStrings: [number, string][] = lines.map(nl => {
-    const str = (regex.exec(nl[1]) as string[])[3]
-    return [nl[0], str]
-  })
-
-  return numberedTodoStrings.map(numberedTodo => {
-    const lineNumber = numberedTodo[0] + 1
-    const str = numberedTodo[1]
-    const dateRegex = /@due: (\d\d\d\d-\d\d-\d\d)/
-    let dueDate: Date | undefined
-    if (dateRegex.test(str)) {
-      const dateStr = (dateRegex.exec(str) as string[])[1]
-      dueDate = new Date(dateStr)
-    }
-    const title = str.replace(dateRegex, '')
-    const id = v1.generate().toString()
-    const tsIndexed = new Date()
-    let shortPath = filePath
-    WATCHED_FOLDERS.forEach(dir => {
-      shortPath = shortPath.replace(dir, '')
-    })
-    console.log(`\textracted: ${title} @L${lineNumber}`)
-    return { title, status, id, tsIndexed, filePath, shortPath, lineNumber, dueDate }
-  })
 }
