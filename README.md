@@ -5,6 +5,11 @@
 deno run --allow-read --allow-run --allow-net --unstable --watch main.ts
 ```
 
+## Test
+```
+deno test --unstable --allow-read
+```
+
 ## Compile
 ```
 deno compile --allow-read --allow-run --allow-net --unstable main.ts
