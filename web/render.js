@@ -15,10 +15,9 @@ export function renderOpenTodos(todos) {
 
         // due date
         let cls = "due-soon"
-        console.log(getDateStr(new Date(todo.dueDate)), getDateStr(new Date()))
         if (getDateStr(new Date(todo.dueDate)) == getDateStr(new Date())) {
           cls = "due-today"
-        } else if (getDateStr(new Date(todo.dueDate)) < getDateStr(new Date())) {
+        } else if (new Date(todo.dueDate) < new Date()) {
           cls = "overdue"
         }
         const dateStr = todo.dueDate ? new Date(todo.dueDate).toDateString() : ''
