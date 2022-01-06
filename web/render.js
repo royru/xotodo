@@ -2,9 +2,13 @@ import { sendTodoOpened } from './socket.js'
 const body = document.querySelector('body')
 
 export function renderOpenTodos(todos) {
-  console.log(todos)
   body.innerHTML = ''
   for (const [filePath, todoList] of todos) {
+
+    if (!todoList.some(todo => todo.status === 'open')) {
+      continue
+    }
+
     let shortened = filePath.replace(/\/Users\/roy\//, '~/')
     shortened = shortened.replace(/\/Volumes\/GoogleDrive\/My Drive\/|\/Volumes\/Google Drive\/My Drive\//, 'GD:')
     body.appendChild(h3(shortened))
