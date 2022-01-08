@@ -1,5 +1,5 @@
 import { v1 } from "https://deno.land/std@0.91.0/uuid/mod.ts"
-import { parse } from "./xotodo-backend/pkg/xotodo_backend.js"
+import { parse } from "./xotodo-parser/pkg/xotodo_parser.js"
 
 export interface Todo {
   title: string

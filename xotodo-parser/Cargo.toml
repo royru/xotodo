@@ -1,9 +1,9 @@
 [package]
-name = "xotodo-backend"
+name = "xotodo-parser"
 version = "0.1.0"
 edition = "2021"
 authors= ["Roy Rutishauser <roy.rutishauser@gmail.com>"]
-description = "xotodo backend"
+description = "todo parsing in files"
 license = "MIT/Apache-2.0"
 repository = "https://github.com/royru/xotodo"
 

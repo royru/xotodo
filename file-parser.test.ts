@@ -1,9 +1,9 @@
 import { assertEquals } from "https://deno.land/std@0.119.0/testing/asserts.ts"
 import { parseFile } from "./file-parser.ts"
-import init from "./xotodo-backend/pkg/xotodo_backend.js"
+import init from "./xotodo-parser/pkg/xotodo_parser.js"
 
 async function setup(): Promise<string> {
-  await init(Deno.readFile("xotodo-backend/pkg/xotodo_backend_bg.wasm"))
+  await init(Deno.readFile("xotodo-parser/pkg/xotodo_parser_bg.wasm"))
   const data = await Deno.readFile("./test.md")
   const decoder = new TextDecoder("utf-8")
   const text = decoder.decode(data)

@@ -1,2 +1,2 @@
-xotodo-backend/pkg
-xotodo-backend/target
+xotodo-*/pkg
+xotodo-*/target
