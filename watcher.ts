@@ -1,5 +1,6 @@
 import { exists } from "https://deno.land/std/fs/mod.ts"
-import { parseFile } from "./file-parser.ts"
+import { parseFile, Todo } from "./file-parser.ts"
+import { removeTodosForPath } from "./store.ts"
 
 let currentGoogleDrivePath = ''
 setTimeout(checkGoogleDrivePath, 60 * 1000)
@@ -28,26 +29,14 @@ function googleDriveVolumeFix(path: string): string {
   }
 }
 
-function existsFixed(path: string): Promise<boolean> {
+export function existsFixed(path: string): Promise<boolean> {
   return exists(googleDriveVolumeFix(path))
 }
 
 const WATCHED_FOLDERS = [`${currentGoogleDrivePath}/My Drive/Research`, "/Users/roy"]
-const IGNORED_PATH_SEGMENTS = ["/xotodo", "/Library", "/."]
+export const IGNORED_PATH_SEGMENTS = ["/xotodo", "/Library", "/."]
 
-// cleanup in case the any new ignored path segment was added
-for (const path of Object.keys({ ...localStorage })) {
-  if (IGNORED_PATH_SEGMENTS.some(segment => path.includes(segment))) {
-    console.log(`removing ignored path: ${path}`)
-    localStorage.removeItem(path)
-  }
-  else if (! await existsFixed(path)) {
-    console.log(`removing non-existing path: ${path}`)
-    localStorage.removeItem(path)
-  }
-}
-
-export async function watch(onUpdate: () => void) {
+export async function watch(onUpdate: (todos: Todo[], path: string) => void) {
   try {
     const decoder = new TextDecoder("utf-8")
     const watcher = Deno.watchFs(WATCHED_FOLDERS)
@@ -65,10 +54,8 @@ export async function watch(onUpdate: () => void) {
         }
 
         if (!await existsFixed(path)) {
-          if (localStorage.getItem(path) !== null) {
-            localStorage.removeItem(path)
-            onUpdate()
-          }
+          removeTodosForPath(path)
+          onUpdate([], path)
           continue
         }
 
@@ -85,14 +72,7 @@ export async function watch(onUpdate: () => void) {
             })
           })
 
-          if (todos.length > 0) {
-            localStorage.setItem(path, JSON.stringify(todos))
-            onUpdate()
-          } else if (localStorage.getItem(path)) {
-            // here, we previously had todos, but now we don't
-            localStorage.removeItem(path)
-            onUpdate()
-          }
+          onUpdate(todos, path)
 
         } catch (_) {
           console.log("parsing failed")
