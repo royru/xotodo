@@ -1,39 +1,63 @@
 import { Todo } from "./file-parser.ts"
-import { existsFixed, IGNORED_PATH_SEGMENTS } from "./watcher.ts"
+import { existsFixed, IGNORED_PATH_SEGMENTS, WATCHED_FOLDERS } from "./watcher.ts"
+import { TodoStore } from "./xotodo-store/pkg/xotodo_store.js"
 
-const todoMap = new Map<string, Todo[]>()
+let store: TodoStore
+type Path = string
+type TodoDict = Record<Path, Todo[]>
 
-// OTODO: store the todos in the home directory rather than local storage
 export function updateStore(todos: Todo[], path: string) {
-
-  if (todos.length > 0) {
-    localStorage.setItem(path, JSON.stringify(todos))
-  } else if (localStorage.getItem(path)) {
-    // here, we previously had todos, but now we don't
-    localStorage.removeItem(path)
+  try {
+    if (todos.length > 0) {
+      todos = todos.map(t => {
+        if (t.dueDate) {
+          t.dueDate = new Date(t.dueDate).getTime()
+        }
+        t.tsIndexed = new Date(t.tsIndexed).getTime()
+        return t
+      }
+      )
+      JSON.stringify(store.set_item(path, todos))
+    } else if (localStorage.getItem(path)) {
+      // here, we previously had todos, but now we don't
+      JSON.stringify(store.remove_item(path))
+    }
+    write()
+  } catch (error) {
+    console.error(error)
   }
-
-  // for (let i = 0; i <= localStorage.length; i++) {
-  //   const path = localStorage.key(i) as string
-  //   const t = JSON.parse(localStorage.getItem(path) as string) as Todo[]
-  //   if (path) {
-  //     todoMap.set(path, t)
-  //   }
-  // }
 }
 
 export function getStringifiedTodos(): string {
-  return JSON.stringify(Array.from(todoMap.entries()))
+  const todoDict: TodoDict = store.get_items()
+
+  for (let [path, todos] of Object.entries(todoDict)) {
+    todos = todos.map(todo => {
+      for (const dir of WATCHED_FOLDERS) {
+        todo.filePath = path
+        todo.shortPath = path.replace(dir, '')
+      }
+      return todo
+    })
+  }
+  return JSON.stringify(todoDict)
 }
 
-export function removeTodosForPath(path: string) {
-  localStorage.removeItem(path)
-  todoMap.delete(path)
+export async function removeTodosForPath(path: string) {
+  store.remove_item(path)
+  await write()
 }
 
 export async function initialiseStore() {
-  // cleanup in case that a new ignored path segment was added
-  for (const path of Object.keys({ ...localStorage })) {
+  // initialize wasm store
+  store = new TodoStore()
+
+  const data: TodoDict = await read()
+  for (const path of Object.keys(data)) {
+    // populate store
+    store.set_item(path, data[path])
+
+    // cleanup in case that a new ignored path segment was added
     if (IGNORED_PATH_SEGMENTS.some(segment => path.includes(segment))) {
       console.log(`removing ignored path: ${path}`)
       removeTodosForPath(path)
@@ -42,8 +66,23 @@ export async function initialiseStore() {
       console.log(`removing non-existing path: ${path}`)
       removeTodosForPath(path)
     }
-
-    todoMap.set(path, JSON.parse(localStorage.getItem(path) as string) as Todo[])
   }
+}
 
+async function read(): Promise<TodoDict> {
+  try {
+    const decoder = new TextDecoder()
+    const data = await Deno.readFile("/Users/roy/Desktop/xo.todo")
+    return JSON.parse(decoder.decode(data))
+  } catch (error) {
+    console.error(error)
+    return {}
+  }
+}
+
+async function write() {
+  const todos: TodoDict = store.get_items()
+  const encoder = new TextEncoder()
+  const data = encoder.encode(JSON.stringify(todos))
+  await Deno.writeFile("/Users/roy/Desktop/xo.todo", data)
 }

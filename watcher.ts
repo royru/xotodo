@@ -33,8 +33,8 @@ export function existsFixed(path: string): Promise<boolean> {
   return exists(googleDriveVolumeFix(path))
 }
 
-const WATCHED_FOLDERS = [`${currentGoogleDrivePath}/My Drive/Research`, "/Users/roy"]
-export const IGNORED_PATH_SEGMENTS = ["/xotodo", "/Library", "/."]
+export const WATCHED_FOLDERS = [`${currentGoogleDrivePath}/My Drive/Research`, "/Users/roy"]
+export const IGNORED_PATH_SEGMENTS = ["/xotodo", "/Library", "/.", "/xo.todo"]
 
 export async function watch(onUpdate: (todos: Todo[], path: string) => void) {
   try {
@@ -64,13 +64,6 @@ export async function watch(onUpdate: (todos: Todo[], path: string) => void) {
           const text = decoder.decode(data)
           console.log("parsing", path)
           const todos = parseFile(text)
-
-          WATCHED_FOLDERS.forEach((dir: string) => {
-            todos.forEach(t => {
-              t.filePath = path
-              t.shortPath = path.replace(dir, '')
-            })
-          })
 
           onUpdate(todos, path)
 

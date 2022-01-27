@@ -3,8 +3,7 @@ const body = document.querySelector('body')
 
 export function renderOpenTodos(todos) {
   body.innerHTML = ''
-  for (const [filePath, todoList] of todos) {
-
+  for (const [filePath, todoList] of Object.entries(todos)) {
     if (!todoList.some(todo => todo.status === 'open')) {
       continue
     }

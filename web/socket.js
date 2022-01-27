@@ -15,7 +15,7 @@ export function startSocket(onTodosReceived) {
 
   // Listen for messages
   socket.addEventListener('message', function (event) {
-    const todos = new Map(JSON.parse(event.data))
+    const todos = JSON.parse(event.data)
     onTodosReceived(todos)
   })
 
