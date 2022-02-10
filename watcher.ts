@@ -34,45 +34,40 @@ export function existsFixed(path: string): Promise<boolean> {
 }
 
 export const WATCHED_FOLDERS = [`${currentGoogleDrivePath}/My Drive/Research`, "/Users/roy"]
-export const IGNORED_PATH_SEGMENTS = ["/xotodo", "/Library", "/.", "/xo.todo"]
+export const IGNORED_PATH_SEGMENTS = ["/xotodo", "/Library", "/.", "/xo.todo", "/Music/"]
 
 export async function watch(onUpdate: (todos: Todo[], path: string) => void) {
-  try {
-    const decoder = new TextDecoder("utf-8")
-    const watcher = Deno.watchFs(WATCHED_FOLDERS)
 
-    for await (const event of watcher) {
+  const decoder = new TextDecoder("utf-8")
+  const watcher = Deno.watchFs(WATCHED_FOLDERS)
 
-      if (event.paths.length == 0) {
+  for await (const event of watcher) {
+
+    if (event.paths.length == 0) {
+      continue
+    }
+
+    for (const path of event.paths) {
+      if (IGNORED_PATH_SEGMENTS.some(segment => path.includes(segment))) {
+        // ignore
         continue
       }
 
-      for (const path of event.paths) {
-        if (IGNORED_PATH_SEGMENTS.some(segment => path.includes(segment))) {
-          // ignore
-          continue
-        }
+      if (!await existsFixed(path)) {
+        removeTodosForPath(path)
+        onUpdate([], path)
+        continue
+      }
 
-        if (!await existsFixed(path)) {
-          removeTodosForPath(path)
-          onUpdate([], path)
-          continue
-        }
-
-        try {
-          const data = await Deno.readFile(path)
-          const text = decoder.decode(data)
-          console.log("parsing", path)
-          const todos = parseFile(text)
-
-          onUpdate(todos, path)
-
-        } catch (_) {
-          console.log("parsing failed")
-        }
+      try {
+        const data = await Deno.readFile(path)
+        const text = decoder.decode(data)
+        const todos = parseFile(text)
+        console.log("parsed", path)
+        onUpdate(todos, path)
+      } catch (err) {
+        console.error("parsing failed", err)
       }
     }
-  } catch (error) {
-    console.error(error)
   }
 }

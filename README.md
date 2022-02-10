@@ -11,8 +11,9 @@ deno test --unstable --allow-read
 ```
 
 ## Compile
+
 ```
-deno compile --allow-read --allow-run --allow-net --unstable main.ts
+deno compile --allow-read --allow-write --allow-run --allow-net --unstable main.ts
 ```
 
 Currently doesn't work: https://github.com/denoland/deno/issues/10693
@@ -23,3 +24,9 @@ Applications/Firefox.app/Contents/MacOS/firefox -start-debugger-server
 ```
 
 Next, use the debugger in VS Code
+
+### OTODO:
+- Inline (in-browser) editing of todos with webassemly 
+- @topic 
+- @due: autocomplete
+- sort user interface by topic/folder name/due date

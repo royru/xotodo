@@ -18,7 +18,7 @@ export function updateStore(todos: Todo[], path: string) {
       }
       )
       JSON.stringify(store.set_item(path, todos))
-    } else if (localStorage.getItem(path)) {
+    } else if (store.get_item(path)) {
       // here, we previously had todos, but now we don't
       JSON.stringify(store.remove_item(path))
     }
