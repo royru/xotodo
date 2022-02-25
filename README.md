@@ -2,7 +2,7 @@
 
 ## Run
 ```
-deno run --allow-read --allow-run --allow-net --unstable --watch main.ts
+deno run --allow-read --allow-run --allow-write --allow-net --unstable --watch main.ts
 ```
 
 ## Test
