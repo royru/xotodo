@@ -1,4 +1,4 @@
-import { sendTodoOpened } from './socket.js'
+// import { sendTodoOpened } from './socket.js'
 const body = document.querySelector('body')
 
 export function renderOpenTodos(todos) {
@@ -14,8 +14,12 @@ export function renderOpenTodos(todos) {
     body.appendChild(h3(shortened))
     for (const todo of todoList) {
       if (todo.status == 'open') {
-        const pathNode = span(`@${todo.lineNumber}`, 'line-number')
-        pathNode.addEventListener('click', () => sendTodoOpened(todo))
+
+        const url = new URL('edit', location.origin)
+        url.search = new URLSearchParams({ path: todo.filePath, line: todo.lineNumber })
+
+        const pathNode = a(`@${todo.lineNumber}`, url.toString(), 'line-number')
+        // pathNode.addEventListener('click', () => sendTodoOpened(todo))
 
         // due date
         let cls = "due-soon"
@@ -42,6 +46,14 @@ function div(...children) {
 function span(text, className = '') {
   const n = document.createElement('span')
   n.textContent = text
+  n.className = className
+  return n
+}
+
+function a(text, link, className = '') {
+  const n = document.createElement('a')
+  n.textContent = text
+  n.href = link
   n.className = className
   return n
 }
