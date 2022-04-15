@@ -1,0 +1,7 @@
+# https://github.com/thedodd/trunk/blob/master/Trunk.toml
+
+[build]
+# The output dir for all final assets.
+dist = "../web/edit"
+# The public URL from which assets are to be served.
+public_url = "/edit/"
