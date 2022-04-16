@@ -1,4 +1,4 @@
-import { Application, Router } from "https://deno.land/x/oak/mod.ts"
+import { Application, Router, helpers } from "https://deno.land/x/oak/mod.ts"
 import { getStringifiedTodos } from "./store.ts"
 
 const app = new Application()
@@ -25,10 +25,12 @@ router
     ctx.response.body = getStringifiedTodos()
   })
 
-// .get("/api/:id", (ctx) => {
-//   console.log(ctx?.params?.id)
-//   ctx.response.body = "test /"
-// })
+  .get("/api/file", (ctx) => {
+    const { path, line } = helpers.getQuery(ctx)
+
+    const content = Deno.readTextFileSync(path)
+    ctx.response.body = { content, line: Number.parseInt(line) }
+  })
 
 app.use(router.routes())
 app.use(router.allowedMethods())

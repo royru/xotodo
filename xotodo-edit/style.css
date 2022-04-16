@@ -1,0 +1,12 @@
+body {
+  font-family: Menlo, Courier, monospace;
+}
+
+span {
+  display: block;
+}
+
+span.otodo {
+  color: #00f;
+  font-weight: bold;
+}
