@@ -16,42 +16,62 @@ struct File {
 }
 
 #[derive(Clone, PartialEq)]
-struct Line {
+struct NormalLine {
     index: usize,
     content: String,
 }
 
-#[derive(Properties, PartialEq)]
-struct FileLinesProps {
-    lines: Vec<Line>,
-    on_click: Callback<Line>,
+#[derive(Clone, PartialEq)]
+struct TodoLine {
+    index: usize,
+    content: String,
+    status: TodoStatus,
+    date: i32,
+}
+#[derive(Clone, PartialEq)]
+enum TodoStatus {
+    Open,
+    Completed,
+}
+
+#[derive(Clone, PartialEq)]
+enum Line {
+    Normal(NormalLine),
+    Todo(TodoLine),
 }
 
 #[derive(Clone, PartialEq)]
 struct FileLinesTuple(File, Vec<Line>);
 
-#[function_component(FileLines)]
-fn file_lines(FileLinesProps { lines, on_click }: &FileLinesProps) -> Html {
+#[derive(Properties, PartialEq)]
+struct NormalLineProps {
+    line: NormalLine,
+}
+
+#[derive(Properties, PartialEq)]
+struct TodoLineProps {
+    line: TodoLine,
+    on_click: Callback<TodoLine>,
+}
+
+#[function_component(TodoLineElem)]
+fn todo_line_elem(TodoLineProps { line, on_click }: &TodoLineProps) -> Html {
     let on_click = on_click.clone();
-    lines
-        .iter()
-        .map(|line| {
-            log(&line.content);
-            if line.content.contains("OTODO:") {
-                let on_todo_select = {
-                    let on_click = on_click.clone();
-                    let line = line.clone();
-                    Callback::from(move |_| on_click.emit(line.clone()))
-                };
-                return html! {
-                  <span onclick={on_todo_select} class="otodo">{format!("{}", line.content)}</span>
-                };
-            }
-            html! {
-              <span>{format!("{}", line.content)}</span>
-            }
-        })
-        .collect()
+    let on_todo_select = {
+        let on_click = on_click.clone();
+        let l = line.clone();
+        Callback::from(move |_| on_click.emit(l.clone()))
+    };
+    html! {
+      <span onclick={on_todo_select} class="otodo">{format!("{}", line.content)}</span>
+    }
+}
+
+#[function_component(NormalLineElem)]
+fn normal_line_elem(NormalLineProps { line }: &NormalLineProps) -> Html {
+    html! {
+      <span>{format!("{}", line.content)}</span>
+    }
 }
 
 fn load_data() -> UseStateHandle<Option<FileLinesTuple>> {
@@ -79,9 +99,20 @@ fn load_data() -> UseStateHandle<Option<FileLinesTuple>> {
                         .content
                         .lines()
                         .enumerate()
-                        .map(|(i, l)| Line {
-                            content: l.to_string(),
-                            index: i,
+                        .map(|(i, l)| {
+                            if l.contains("OTODO:") {
+                                return Line::Todo(TodoLine {
+                                    content: l.to_string(),
+                                    index: i,
+                                    status: TodoStatus::Open,
+                                    date: 0,
+                                });
+                            } else {
+                                return Line::Normal(NormalLine {
+                                    content: l.to_string(),
+                                    index: i,
+                                });
+                            }
                         })
                         .collect();
 
@@ -111,13 +142,16 @@ fn app() -> Html {
             Some(data_ref) => {
                 let file = data_ref.0.clone();
                 let lines = data_ref.1.clone();
-                Callback::from(move |line: Line| {
+                Callback::from(move |line: TodoLine| {
                     let mut lines = lines.clone();
                     let file = file.clone();
-                    lines[line.index] = Line {
+                    lines[line.index] = Line::Todo(TodoLine {
                         index: line.index,
-                        content: "test".to_string(),
-                    };
+                        // OTODO:
+                        content: "TODO:done".to_string(),
+                        status: TodoStatus::Completed,
+                        date: 0,
+                    });
                     data.set(Some(FileLinesTuple(file, lines)));
                 })
             }
@@ -129,10 +163,23 @@ fn app() -> Html {
 
     if let Some(data) = data.as_ref() {
         let lines = data.1.clone();
+
+        let elems: Vec<Html> = lines
+            .iter()
+            .map(|line: &Line| match line {
+                Line::Normal(l) => {
+                    return html! {<NormalLineElem line={l.clone()} />};
+                }
+                Line::Todo(l) => {
+                    return html! {<TodoLineElem line={l.clone()} on_click={on_todo_select.clone()} />};
+                }
+            })
+            .collect();
+
         return html! {
           <>
             <a href="/">{"Back"}</a>
-            <FileLines lines={lines.clone()} on_click={on_todo_select.clone()}/>
+            { for elems }
           </>
         };
     }
