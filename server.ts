@@ -24,12 +24,29 @@ router
   .get("/api/todos", (ctx) => {
     ctx.response.body = getStringifiedTodos()
   })
-
   .get("/api/file", (ctx) => {
     const { path, line } = helpers.getQuery(ctx)
-
     const content = Deno.readTextFileSync(path)
-    ctx.response.body = { content, selected_line: Number.parseInt(line) }
+    ctx.response.body = { file_path: path, content, selected_line: Number.parseInt(line) }
+  })
+  .post("/api/complete", (ctx) => {
+    const { path, line } = helpers.getQuery(ctx)
+    const content = Deno.readTextFileSync(path)
+    const lines = content.split('\n')
+    const index = Number.parseInt(line)
+    if (lines.length >= index && lines[index].includes('OTODO:')) {
+      lines[index] = lines[index].replace('OTODO:', 'XTODO:')
+      Deno.writeTextFileSync(path, lines.join('\n'))
+      ctx.response.body = "ok"
+    } else {
+      console.error("Invalid line number. No OTODO found.")
+      Deno.exit()
+    }
+    // console.log(ctx.request.hasBody)
+    // const res = ctx.request.body()
+    // console.log(res.type)
+    // console.log(await res.value)
+    // ctx.response.body = "ok"
   })
 
 app.use(router.routes())
