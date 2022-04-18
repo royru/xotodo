@@ -1,46 +1,66 @@
 use reqwasm::http::Request;
 use serde::Deserialize;
-use yew::prelude::*;
+use wasm_bindgen::prelude::*;
+use yew::{prelude::*, UseStateHandle};
+
+#[wasm_bindgen]
+extern "C" {
+    #[wasm_bindgen(js_namespace = console)]
+    fn log(s: &str);
+}
 
 #[derive(Clone, PartialEq, Deserialize)]
 struct File {
-    line: usize,
+    selected_line: usize,
+    content: String,
+}
+
+#[derive(Clone, PartialEq)]
+struct Line {
+    index: usize,
     content: String,
 }
 
 #[derive(Properties, PartialEq)]
 struct FileLinesProps {
-    lines: Vec<String>,
+    lines: Vec<Line>,
+    on_click: Callback<Line>,
 }
 
-#[function_component(FileLine)]
-fn file_lines(FileLinesProps { lines }: &FileLinesProps) -> Html {
+#[derive(Clone, PartialEq)]
+struct FileLinesTuple(File, Vec<Line>);
+
+#[function_component(FileLines)]
+fn file_lines(FileLinesProps { lines, on_click }: &FileLinesProps) -> Html {
+    let on_click = on_click.clone();
     lines
         .iter()
         .map(|line| {
-            if line.contains("OTODO:") {
+            log(&line.content);
+            if line.content.contains("OTODO:") {
+                let on_todo_select = {
+                    let on_click = on_click.clone();
+                    let line = line.clone();
+                    Callback::from(move |_| on_click.emit(line.clone()))
+                };
                 return html! {
-                  <span class="otodo">{format!("{}", line)}</span>
+                  <span onclick={on_todo_select} class="otodo">{format!("{}", line.content)}</span>
                 };
             }
             html! {
-              <span>{format!("{}", line)}</span>
+              <span>{format!("{}", line.content)}</span>
             }
         })
         .collect()
 }
 
-#[function_component(App)]
-fn app() -> Html {
-    let file = use_state(|| File {
-        content: "".to_string(),
-        line: 1,
-    });
+fn load_data() -> UseStateHandle<Option<FileLinesTuple>> {
+    let data: UseStateHandle<Option<FileLinesTuple>> = use_state(|| None);
     {
-        let file = file.clone();
+        let data = data.clone();
         use_effect_with_deps(
             move |_| {
-                let file = file.clone();
+                let data = data.clone();
                 wasm_bindgen_futures::spawn_local(async move {
                     let window = web_sys::window().unwrap();
                     let loc = window.location();
@@ -54,7 +74,18 @@ fn app() -> Html {
                         .json()
                         .await
                         .unwrap();
-                    file.set(fetched_file);
+
+                    let lines: Vec<Line> = fetched_file
+                        .content
+                        .lines()
+                        .enumerate()
+                        .map(|(i, l)| Line {
+                            content: l.to_string(),
+                            index: i,
+                        })
+                        .collect();
+
+                    data.set(Some(FileLinesTuple(fetched_file, lines)));
                 });
                 || ()
             },
@@ -62,14 +93,51 @@ fn app() -> Html {
         );
     };
 
-    let file_strings: Vec<String> = file.content.lines().map(|l| l.to_string()).collect();
+    data
+}
 
-    html! {
-        <>
-          <a href="/">{"Back"}</a>
-          <FileLine lines={file_strings.clone()}/>
-        </>
+#[function_component(App)]
+fn app() -> Html {
+    let data = load_data();
+    let default = html! {
+      <>
+        <a href="/">{"Back"}</a>
+      </>
+    };
+
+    let on_todo_select = {
+        let data = data.clone();
+        match data.as_ref() {
+            Some(data_ref) => {
+                let file = data_ref.0.clone();
+                let lines = data_ref.1.clone();
+                Callback::from(move |line: Line| {
+                    let mut lines = lines.clone();
+                    let file = file.clone();
+                    lines[line.index] = Line {
+                        index: line.index,
+                        content: "test".to_string(),
+                    };
+                    data.set(Some(FileLinesTuple(file, lines)));
+                })
+            }
+            _ => {
+                return default;
+            }
+        }
+    };
+
+    if let Some(data) = data.as_ref() {
+        let lines = data.1.clone();
+        return html! {
+          <>
+            <a href="/">{"Back"}</a>
+            <FileLines lines={lines.clone()} on_click={on_todo_select.clone()}/>
+          </>
+        };
     }
+
+    default
 }
 
 fn main() {

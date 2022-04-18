@@ -29,7 +29,7 @@ router
     const { path, line } = helpers.getQuery(ctx)
 
     const content = Deno.readTextFileSync(path)
-    ctx.response.body = { content, line: Number.parseInt(line) }
+    ctx.response.body = { content, selected_line: Number.parseInt(line) }
   })
 
 app.use(router.routes())

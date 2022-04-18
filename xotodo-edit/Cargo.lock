@@ -476,6 +476,7 @@ version = "0.1.0"
 dependencies = [
  "reqwasm",
  "serde",
+ "wasm-bindgen",
  "wasm-bindgen-futures",
  "web-sys",
  "yew",
