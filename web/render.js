@@ -18,7 +18,7 @@ export function renderOpenTodos(todos) {
         const url = new URL('edit', location.origin)
         url.search = new URLSearchParams({ path: todo.filePath, line: todo.lineNumber })
 
-        const pathNode = a(`@${todo.lineNumber}`, url.toString(), 'line-number')
+        const pathNode = a(`@${todo.lineNumber}`, url.toString(), 'line-number', '_blank')
         // pathNode.addEventListener('click', () => sendTodoOpened(todo))
 
         // due date
@@ -50,11 +50,12 @@ function span(text, className = '') {
   return n
 }
 
-function a(text, link, className = '') {
+function a(text, link, className = '', target = '') {
   const n = document.createElement('a')
   n.textContent = text
   n.href = link
   n.className = className
+  n.target = target
   return n
 }
 

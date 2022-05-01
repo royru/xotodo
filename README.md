@@ -18,6 +18,13 @@ deno compile --allow-read --allow-write --allow-run --allow-net --unstable main.
 
 Currently doesn't work: https://github.com/denoland/deno/issues/10693
 
+## Compile Rust Components
+
+```
+cd xotodo-edit
+trunk build
+```
+
 ## Debug in Firefox
 ``` 
 Applications/Firefox.app/Contents/MacOS/firefox -start-debugger-server

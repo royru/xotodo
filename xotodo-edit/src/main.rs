@@ -65,14 +65,20 @@ fn todo_line_elem(TodoLineProps { line, on_click }: &TodoLineProps) -> Html {
         Callback::from(move |_| on_click.emit(l.clone()))
     };
     html! {
-      <span onclick={on_todo_select} class="otodo">{format!("{}", line.content)}</span>
+      <p onclick={on_todo_select} class="otodo">
+        <span class="line-number">{line.index}</span>
+        <pre class="line-content">{format!("{}", line.content)}</pre>
+      </p>
     }
 }
 
 #[function_component(NormalLineElem)]
 fn normal_line_elem(NormalLineProps { line }: &NormalLineProps) -> Html {
     html! {
-      <span>{format!("{}", line.content)}</span>
+      <p>
+        <span class="line-number">{line.index}</span>
+        <pre class="line-content">{format!("{}", line.content)}</pre>
+      </p>
     }
 }
 
@@ -150,7 +156,7 @@ fn app() -> Html {
     let data = load_data();
     let default = html! {
       <>
-        <a href="/">{"Back"}</a>
+        <p>{"Not loaded"}</p>
       </>
     };
 
@@ -194,7 +200,6 @@ fn app() -> Html {
 
         return html! {
           <>
-            <a href="/">{"Back"}</a>
             { for elems }
           </>
         };

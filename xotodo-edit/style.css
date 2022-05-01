@@ -1,12 +1,31 @@
 body {
   font-family: Menlo, Courier, monospace;
+  font-size: 13px;
+  line-height: 20px;
+  background-color: #312c2c;
+  color: #d5d0d0;
 }
 
-span {
+p {
+  margin: 0;
+  display: flex;
+}
+
+pre.line-content {
+  display: block;
+  font-family: inherit;
+  margin: 0;
+  white-space: break-spaces;
+}
+
+span.line-number {
+  color: #5c5c5c;
+  width: 30px;
   display: block;
 }
 
-span.otodo {
-  color: #00f;
+p.otodo {
+  cursor: pointer;
+  color: #fcc200;
   font-weight: bold;
 }
