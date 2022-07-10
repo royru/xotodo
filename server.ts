@@ -29,6 +29,20 @@ router
     const content = Deno.readTextFileSync(path)
     ctx.response.body = { file_path: path, content, selected_line: Number.parseInt(line) }
   })
+  .post("/api/remove", (ctx) => {
+    const { path, line } = helpers.getQuery(ctx)
+    const content = Deno.readTextFileSync(path)
+    const lines = content.split('\n')
+    const index = Number.parseInt(line)
+    if (lines.length >= index && (lines[index].includes('OTODO:') || lines[index].includes('XTODO:'))) {
+      lines.splice(index, 1)
+      Deno.writeTextFileSync(path, lines.join('\n'))
+      ctx.response.body = "ok"
+    } else {
+      console.error("Invalid line number. No (XO)TODO found.")
+      Deno.exit()
+    }
+  })
   .post("/api/complete", (ctx) => {
     const { path, line } = helpers.getQuery(ctx)
     const content = Deno.readTextFileSync(path)

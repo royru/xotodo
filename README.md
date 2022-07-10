@@ -1,6 +1,9 @@
 # XOTODO
 
 ## Run
+
+In `./xotodo-edit`, run `trunk build`. Then...
+
 ```
 deno run --allow-read --allow-run --allow-write --allow-net --unstable --watch main.ts
 ```
@@ -32,8 +35,11 @@ Applications/Firefox.app/Contents/MacOS/firefox -start-debugger-server
 
 Next, use the debugger in VS Code
 
-### OTODO:
-- Inline (in-browser) editing of todos with webassemly 
-- @topic 
-- @due: autocomplete
+### BACKLOG
+- Inline (in-browser) editing of todos 
+- @topic @project
+- GitHub issues integration
+- tiles layout
+- "my todos for today" - high-level goals of today
+- extension: @due: data auto-complete
 - sort user interface by topic/folder name/due date

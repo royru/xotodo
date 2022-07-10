@@ -53,21 +53,57 @@ struct NormalLineProps {
 #[derive(Properties, PartialEq)]
 struct TodoLineProps {
     line: TodoLine,
-    on_click: Callback<TodoLine>,
+    on_status_click: Callback<TodoLine>,
+    on_line_click: Callback<TodoLine>,
+    on_remove_click: Callback<TodoLine>,
 }
 
 #[function_component(TodoLineElem)]
-fn todo_line_elem(TodoLineProps { line, on_click }: &TodoLineProps) -> Html {
-    let on_click = on_click.clone();
-    let on_todo_select = {
-        let on_click = on_click.clone();
-        let l = line.clone();
-        Callback::from(move |_| on_click.emit(l.clone()))
+fn todo_line_elem(
+    TodoLineProps {
+        line,
+        on_status_click,
+        on_line_click,
+        on_remove_click,
+    }: &TodoLineProps,
+) -> Html {
+    let on_line_click = on_line_click.clone();
+    let on_remove_click = on_remove_click.clone();
+
+    let class_str = if line.content.contains("OTODO:") {
+        "otodo"
+    } else {
+        "xtodo"
     };
+
+    let on_line_cb = {
+        if class_str == "xtodo" {
+            Callback::from(move |_| log("otodo is already completed... line click ignored"))
+        } else {
+            let on_line_click = on_line_click.clone();
+            let l = line.clone();
+            Callback::from(move |_| {
+                on_line_click.emit(l.clone());
+            })
+        }
+    };
+
+    let on_remove_cb = {
+        let on_remove_click = on_remove_click.clone();
+        let l = line.clone();
+        Callback::from(move |e: MouseEvent| {
+            e.stop_propagation();
+            on_remove_click.emit(l.clone())
+        })
+    };
+
+    // OTODO: split up string, use existing parser for that, status should be togglable
+
     html! {
-      <p onclick={on_todo_select} class="otodo">
-        <span class="line-number">{line.index}</span>
+      <p onclick={on_line_cb} class={class_str}>
+        <span class="line-number">{line.index+1}</span>
         <pre class="line-content">{format!("{}", line.content)}</pre>
+        <button onclick={on_remove_cb}>{"Remove"}</button>
       </p>
     }
 }
@@ -76,7 +112,7 @@ fn todo_line_elem(TodoLineProps { line, on_click }: &TodoLineProps) -> Html {
 fn normal_line_elem(NormalLineProps { line }: &NormalLineProps) -> Html {
     html! {
       <p>
-        <span class="line-number">{line.index}</span>
+        <span class="line-number">{line.index+1}</span>
         <pre class="line-content">{format!("{}", line.content)}</pre>
       </p>
     }
@@ -128,6 +164,13 @@ async fn load_data_future() -> FileLinesTuple {
                     status: TodoStatus::Open,
                     date: 0,
                 });
+            } else if l.contains("XTODO:") {
+                return Line::Todo(TodoLine {
+                    content: l.to_string(),
+                    index: i,
+                    status: TodoStatus::Completed,
+                    date: 0,
+                });
             } else {
                 return Line::Normal(NormalLine {
                     content: l.to_string(),
@@ -151,6 +194,17 @@ async fn set_todo_completed(line_number: usize, file_path: String) {
     Box::new(Request::post(url.as_str())).send().await.unwrap();
 }
 
+async fn remove_todo(line_number: usize, file_path: String) {
+    let path = encode(&file_path);
+    let url = String::from(format!(
+        "/api/remove?path={}&line={}",
+        path,
+        line_number.to_string()
+    ));
+
+    Box::new(Request::post(url.as_str())).send().await.unwrap();
+}
+
 #[function_component(App)]
 fn app() -> Html {
     let data = load_data();
@@ -160,7 +214,7 @@ fn app() -> Html {
       </>
     };
 
-    let on_todo_select = {
+    let on_line_clicked = {
         let data = data.clone();
         match data.as_ref() {
             Some(data_ref) => {
@@ -183,6 +237,29 @@ fn app() -> Html {
         }
     };
 
+    let on_remove_clicked = {
+        let data = data.clone();
+        match data.as_ref() {
+            Some(data_ref) => {
+                let file = data_ref.0.clone();
+                let data = data.clone();
+                Callback::from(move |line: TodoLine| {
+                    let file_path = file.file_path.clone();
+                    let future = remove_todo(line.index, file_path);
+                    let data = data.clone();
+                    wasm_bindgen_futures::spawn_local(async move {
+                        future.await;
+                        let res = load_data_future().await;
+                        data.set(Some(res))
+                    });
+                })
+            }
+            _ => {
+                return default;
+            }
+        }
+    };
+
     if let Some(data) = data.as_ref() {
         let lines = data.1.clone();
 
@@ -193,7 +270,10 @@ fn app() -> Html {
                     return html! {<NormalLineElem line={l.clone()} />};
                 }
                 Line::Todo(l) => {
-                    return html! {<TodoLineElem line={l.clone()} on_click={on_todo_select.clone()} />};
+                    return html! {<TodoLineElem line={l.clone()}
+                    on_line_click={on_line_clicked.clone()}
+                    on_remove_click={on_remove_clicked.clone()}
+                    on_status_click={on_line_clicked.clone()}/>};
                 }
             })
             .collect();

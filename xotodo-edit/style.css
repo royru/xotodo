@@ -29,3 +29,30 @@ p.otodo {
   color: #fcc200;
   font-weight: bold;
 }
+
+p:hover {
+  background-color: #393434;
+}
+
+p:hover button {
+  display: block;
+}
+
+p button {
+  display: none;
+  position: absolute;
+  right: 20px;
+  padding: 0 5px;
+  border: none;
+  background: red;
+  color: black;
+  cursor: pointer;
+}
+
+p.xtodo pre {
+  position: relative;
+  cursor: pointer;
+  color: #d5d0d0;
+  text-decoration: line-through;
+  font-weight: normal;
+}
