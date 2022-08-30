@@ -1,11 +1,9 @@
-extern crate lazy_static;
-extern crate regex;
 extern crate serde;
+extern crate xotodo_parser_lib;
 
-use lazy_static::lazy_static;
-use regex::Regex;
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::prelude::*;
+use xotodo_parser_lib::parse_todo;
 
 #[derive(Serialize, Deserialize)]
 pub enum Status {
@@ -41,40 +39,13 @@ extern "C" {
 
 #[wasm_bindgen]
 pub fn parse(content: &str) -> JsValue {
-    let split = content.split("\n");
-    let lines: Vec<&str> = split.collect();
+    let todos = parse_todo(content);
+    to_serializable_todos()
+}
 
-    lazy_static! {
-        static ref RE: Regex = Regex::new(r"([XO]TODO:\s)(.+)").unwrap();
-        static ref RE_DUE: Regex = Regex::new(r"(\s?@due:\s?)(\d{4}-\d{2}-\d{2})\s?").unwrap();
-    }
-
-    let mut todos: Vec<Todo> = vec![];
-
-    for (i, line) in lines.iter().enumerate() {
-        for cap in RE.captures_iter(line) {
-            let mut title = (&cap[2]).to_string();
-            let mut due_date: Option<f64> = None;
-            let status = if &cap[1] == "OTODO: " {
-                Status::Open
-            } else {
-                Status::Closed
-            };
-
-            for due_cap in RE_DUE.captures_iter(&cap[2]) {
-                title = title.replace(&due_cap[0], "");
-                due_date = Date::parse(&due_cap[2]);
-            }
-
-            let todo = Todo {
-                title,
-                status,
-                line_number: (i + 1) as u32,
-                ts_indexed: Date::now(),
-                due_date,
-            };
-            todos.push(todo)
-        }
+fn to_serializable_todos(&todos: Vec<Todo>) -> JsValue {
+    for todo in todos {
+        // OTODO: replace NaiveDate with f64 ts
     }
 
     JsValue::from_serde(&todos).unwrap()
