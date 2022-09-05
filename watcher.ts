@@ -66,7 +66,7 @@ export async function watch(onUpdate: (todos: Todo[], path: string) => void) {
         console.log("parsed", path)
         onUpdate(todos, path)
       } catch (err) {
-        console.error("parsing failed", err)
+        console.error(`parsing failed for ${path}:`, err)
       }
     }
   }

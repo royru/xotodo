@@ -1,5 +1,6 @@
 target
 xotodo
 test.ts
+*.js
 # auto-generated with `trunk build`
 web/edit 

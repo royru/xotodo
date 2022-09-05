@@ -2,21 +2,25 @@
 
 ## Run
 
-In `./xotodo-edit`, run `trunk build`. Then...
+1. In `./xotodo-edit`, run `trunk build`.
+2. `deno bundle --config web/deno.json web/main.ts web/lib/bundle.js`
+3. Start the system: 
 
 ```
-deno run --allow-read --allow-run --allow-write --allow-net --unstable --watch main.ts
+deno run --allow-read --allow-run --allow-write --allow-net --watch main.ts
 ```
 
 ## Test
 ```
-deno test --unstable --allow-read
+deno test --allow-read
 ```
+
+Alternatively, navigate to a rust crate and run `cargo test`
 
 ## Compile
 
 ```
-deno compile --allow-read --allow-write --allow-run --allow-net --unstable main.ts
+deno compile --allow-read --allow-write --allow-run --allow-net main.ts
 ```
 
 Currently doesn't work: https://github.com/denoland/deno/issues/10693
@@ -39,7 +43,6 @@ Next, use the debugger in VS Code
 - Inline (in-browser) editing of todos 
 - @topic @project
 - GitHub issues integration
-- tiles layout
 - "my todos for today" - high-level goals of today
 - extension: @due: data auto-complete
-- sort user interface by topic/folder name/due date
+- sort user interface either by topic, folder or dueDate
