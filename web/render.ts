@@ -4,9 +4,9 @@ import { TodoDict } from "./api.ts"
 const dueDateDiv = document.querySelector('#due-date')!
 const noDueDateDiv = document.querySelector('#no-due-date')!
 
-
 export function renderOpenTodos(todoDict: TodoDict) {
   dueDateDiv.innerHTML = ''
+  noDueDateDiv.innerHTML = ''
 
   const todos: [string, Todo][] = []
 
@@ -17,14 +17,19 @@ export function renderOpenTodos(todoDict: TodoDict) {
     })
   }
 
+  const todayStr = getDateStr(new Date())
+
   const today = todos
-    .filter(([_, todo]) => todo.dueDate && getDateStr(new Date(todo.dueDate)) === getDateStr(new Date()))
+    .filter(([_, todo]) => todo.dueDate && getDateStr(todo.dueDate) === todayStr)
 
   const overdue = todos
-    .filter(([_, todo]) => todo.dueDate && new Date(todo.dueDate) < new Date())
+    .filter(([_, todo]) => todo.dueDate && getDateStr(todo.dueDate) < todayStr)
     .sort(([_, a], [__, b]) => new Date(a.dueDate!).getTime() - new Date(b.dueDate!).getTime())
 
-  const upcoming = todos.filter(([_, todo]) => todo.dueDate && new Date(todo.dueDate) > new Date())
+  const upcoming = todos
+    .filter(([_, todo]) => todo.dueDate && getDateStr(todo.dueDate) > todayStr)
+    .sort(([_, a], [__, b]) => new Date(b.dueDate!).getTime() - new Date(a.dueDate!).getTime())
+
   const noDueDates = todos
     .filter(([_, todo]) => !todo.dueDate)
     // sort by filepath
@@ -59,7 +64,7 @@ function renderSection(todos: [string, Todo][], wrapper: any, cls: string) {
     const pathNode = a(`${filePath}#${todo.lineNumber}`, url.toString(), 'edit', '_blank')
 
     if (todo.dueDate) {
-      const dateStr = new Date(getDateStr(new Date(todo.dueDate)))
+      const dateStr = new Date(getDateStr(todo.dueDate))
       const todayStr = new Date(getDateStr(new Date()))
       const daysOverdue = ((dateStr.getTime() - todayStr.getTime()) / (60 * 60 * 24 * 1000)).toString()
       wrapper.appendChild(div(span(todo.title, 'text'), pathNode, span(daysOverdue, "date " + cls)))
@@ -100,6 +105,7 @@ function h3(text: string) {
   return n
 }
 
-function getDateStr(d: Date) {
+function getDateStr(date: Date | number) {
+  const d = new Date(date)
   return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`
 }

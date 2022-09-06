@@ -5,7 +5,7 @@ export type TodoDict = Record<Path, Todo[]>
 
 export function startPolling(onTodosReceived: (todos: TodoDict) => void) {
   getData() // initial call
-  setInterval(getData, 300000)
+  setInterval(getData, 3000)
 
   async function getData() {
     const res = await fetch('/api/todos')
