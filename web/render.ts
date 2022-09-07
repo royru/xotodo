@@ -19,6 +19,8 @@ export function renderOpenTodos(todoDict: TodoDict) {
 
   const todayStr = getDateStr(new Date())
 
+  console.log(todos.filter(([_, todo]) => todo.title.startsWith('Grade samuel')))
+
   const today = todos
     .filter(([_, todo]) => todo.dueDate && getDateStr(todo.dueDate) === todayStr)
 
@@ -33,7 +35,7 @@ export function renderOpenTodos(todoDict: TodoDict) {
   const noDueDates = todos
     .filter(([_, todo]) => !todo.dueDate)
     // sort by filepath
-    .sort(([a, _], [b, _2]) => a.localeCompare(b))
+    .sort(([a, _], [b, __]) => a.localeCompare(b))
 
   if (today.length > 0) {
     renderSection(today, dueDateDiv, "today")
@@ -107,5 +109,8 @@ function h3(text: string) {
 
 function getDateStr(date: Date | number) {
   const d = new Date(date)
-  return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`
+  // leftpad
+  const month = d.getMonth() + 1 < 10 ? `0${d.getMonth() + 1}` : d.getMonth() + 1
+  const day = d.getDate() < 10 ? `0${d.getDate()}` : d.getDate()
+  return `${d.getFullYear()}-${month}-${day}`
 }
