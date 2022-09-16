@@ -62,7 +62,7 @@ export async function watch(onUpdate: (todos: Todo[], path: string) => void) {
       try {
         const data = await Deno.readFile(path)
         const text = decoder.decode(data)
-        const todos = parseFile(text)
+        const todos = parseFile(text, path)
         console.log("parsed", path)
         onUpdate(todos, path)
       } catch (err) {

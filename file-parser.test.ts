@@ -14,7 +14,7 @@ Deno.test({
   name: "parsing multiple lines",
   fn: async () => {
     const text = await setup()
-    const todos = parseFile(text)
+    const todos = parseFile(text, "/my/fake/path/file.md")
     assertEquals(todos.length, 3)
     assertEquals(todos[2].status, 'closed')
     assertEquals(todos[2].lineNumber, 23)
@@ -25,7 +25,7 @@ Deno.test({
   name: "parsing invalid date",
   fn: async () => {
     await setup()
-    const todos = parseFile("OTODO: test @due:2021-99-32")
+    const todos = parseFile("OTODO: test @due:2021-99-32", "/my/fake/path/file.md")
     assertEquals(todos.length, 1)
     assertEquals(todos[0].dueDate, undefined)
   },

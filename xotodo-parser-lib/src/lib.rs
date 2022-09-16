@@ -19,9 +19,10 @@ pub struct Todo {
     pub ts_indexed: DateTime<Utc>,
     pub status: Status,
     pub due_date: Option<NaiveDate>,
+    pub project: String,
 }
 
-pub fn parse_todo(content: &str) -> Result<Vec<Todo>, ParseError> {
+pub fn parse_todo(content: &str, file_path: &str) -> Result<Vec<Todo>, ParseError> {
     let split = content.split("\n");
     let lines: Vec<&str> = split.collect();
 
@@ -57,6 +58,7 @@ pub fn parse_todo(content: &str) -> Result<Vec<Todo>, ParseError> {
                 line_number: (i + 1) as u32,
                 ts_indexed: Utc::now(),
                 due_date,
+                project: file_path.to_string(), // OTODO: need to parse project
             };
             todos.push(todo)
         }
@@ -74,7 +76,7 @@ mod tests {
         OTODO: this is a test
         OTODO: this is another test @due:2022-02-03";
 
-        let todos = parse_todo(test).unwrap();
+        let todos = parse_todo(test, "").unwrap();
         println!("{:?}", todos);
         assert_eq!(todos[0].title, "this is a test");
         assert_eq!(todos[1].title, "this is another test");
@@ -83,7 +85,7 @@ mod tests {
     #[test]
     fn invalid_due_date() {
         let test = "OTODO: here, the due date is ignored due to bad formatting @due:02-02";
-        let todos = parse_todo(test);
+        let todos = parse_todo(test, "");
         println!("{:?}", todos);
         match todos {
             Ok(t) => assert_eq!(t[0].due_date, None),

@@ -3,8 +3,9 @@
 ## Run
 
 1. In `./xotodo-edit`, run `trunk build`.
-2. `deno bundle --config web/deno.json web/main.ts web/lib/bundle.js`
-3. Start the system: 
+2. In `./xotodo-parser` and `./xotodo-store`. run `wasm-pack build target --web`.
+3. `deno bundle --config web/deno.json web/main.ts web/lib/bundle.js`
+4. Start the system: 
 
 ```
 deno run --allow-read --allow-run --allow-write --allow-net --watch main.ts
@@ -41,8 +42,9 @@ Next, use the debugger in VS Code
 
 ### BACKLOG
 - Inline (in-browser) editing of todos 
-- @topic @project
+- @topic
 - GitHub issues integration
-- "my todos for today" - high-level goals of today
+- "my focus for today" - high-level goals to focus on today
 - extension: @due: data auto-complete
 - sort user interface either by topic, folder or dueDate
+- extract all hard-coded filepaths and make it configurable

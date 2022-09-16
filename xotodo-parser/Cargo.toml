@@ -14,4 +14,5 @@ crate-type = ["cdylib"]
 [dependencies]
 wasm-bindgen = { version = "0.2", features = ["serde-serialize"] }
 serde = { version = "1.0", features = ["derive"] }
-xotodo-parser-lib = { path = "../xotodo-parser-lib" }
+xotodo_parser_lib = { path = "../xotodo-parser-lib" }
+chrono = "0.4.19"

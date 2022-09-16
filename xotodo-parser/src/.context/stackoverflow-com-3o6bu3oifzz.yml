@@ -1,0 +1,7 @@
+id: 3o6bu3oifzz
+timestamp: 2022-09-16T07:46:24.823Z
+author: unknown
+path: https://stackoverflow.com/questions/61480342/serde-serialize-with-proxy-type-for-remote-object
+fsScope: lib.rs
+granularity: code-granularity
+code: struct TodoWrapper(#[serde(with = "TodoDef")] Todo);

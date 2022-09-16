@@ -15,12 +15,14 @@ export function updateStore(todos: Todo[], path: string) {
         }
         t.tsIndexed = new Date(t.tsIndexed).getTime()
         return t
-      }
-      )
-      JSON.stringify(store.set_item(path, todos))
+      })
+
+      // save the todo item to the wasm/rust store
+      store.set_item(path, todos)
+
     } else if (store.get_item(path)) {
       // here, we previously had todos, but now we don't
-      JSON.stringify(store.remove_item(path))
+      store.remove_item(path)
     }
     write()
   } catch (error) {
@@ -35,7 +37,6 @@ export function getStringifiedTodos(): string {
     todos = todos.map(todo => {
       for (const dir of WATCHED_FOLDERS) {
         todo.filePath = path
-        todo.shortPath = path.replace(dir, '')
       }
       return todo
     })
