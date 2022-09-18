@@ -5,19 +5,13 @@ import { parse } from "./xotodo-parser/pkg/xotodo_parser.js"
 export interface Todo {
   title: string
   status: 'open' | 'closed'
-  tsIndexed: number
+  tsIndexed: string // naive date time string of format "YYYY-MM-DD HH:MM:SS"
   filePath: string
   lineNumber: number
-  dueDate?: number
+  dueDate?: string // rust naive date of string format YYYY-MM-DD
   project: string
 }
 
 export function parseFile(text: string, filePath: string): Todo[] {
-  const todos = parse(text, filePath) as Todo[]
-  todos.forEach((t) => {
-    t.tsIndexed = new Date(t.tsIndexed).getTime()
-    // t.id = v1.generate().toString()
-    t.dueDate = t.dueDate ? new Date(t.dueDate).getTime() : undefined
-  })
-  return todos
+  return parse(text, filePath) as Todo[]
 }

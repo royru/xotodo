@@ -9,14 +9,6 @@ type TodoDict = Record<Path, Todo[]>
 export function updateStore(todos: Todo[], path: string) {
   try {
     if (todos.length > 0) {
-      todos = todos.map(t => {
-        if (t.dueDate) {
-          t.dueDate = new Date(t.dueDate).getTime()
-        }
-        t.tsIndexed = new Date(t.tsIndexed).getTime()
-        return t
-      })
-
       // save the todo item to the wasm/rust store
       store.set_item(path, todos)
 
@@ -35,7 +27,7 @@ export function getStringifiedTodos(): string {
 
   for (let [path, todos] of Object.entries(todoDict)) {
     todos = todos.map(todo => {
-      for (const dir of WATCHED_FOLDERS) {
+      for (const _dir of WATCHED_FOLDERS) {
         todo.filePath = path
       }
       return todo
@@ -72,9 +64,8 @@ export async function initialiseStore() {
 
 async function read(): Promise<TodoDict> {
   try {
-    const decoder = new TextDecoder()
-    const data = await Deno.readFile("/Users/roy/Desktop/xo.todo")
-    return JSON.parse(decoder.decode(data))
+    const data = await Deno.readTextFile("/Users/roy/Desktop/xo.todo")
+    return JSON.parse(data)
   } catch (error) {
     console.error(error)
     return {}

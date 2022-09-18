@@ -1,0 +1,12 @@
+id: dcsx2kgvutt
+timestamp: 2022-09-15T20:02:15.236Z
+author: unknown
+path: https://serde.rs/remote-derive.html
+fsScope: lib.rs
+granularity: code-granularity
+code: |-
+  #[derive(Serialize)]
+  #[serde(remote = "Todo")]
+  #[serde(rename_all = "camelCase")]
+  struct TodoDef {
+      title: String,

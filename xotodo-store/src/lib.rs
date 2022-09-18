@@ -1,38 +1,45 @@
 extern crate serde;
-// extern crate sled;
+extern crate xotodo_parser_lib;
 
+mod optional_naive_date_format;
+mod utc_date_format;
+
+use chrono::{DateTime, NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use wasm_bindgen::prelude::*;
-
-// use std::io::Write;
-// use sled::{Config, Result};
-// let mut file = std::fs::File::create("foo.txt")?;
-// file.write_all(b"buf")?;
+use xotodo_parser_lib::{Status, Todo};
 
 #[derive(Serialize, Deserialize)]
-pub enum Status {
+#[serde(remote = "Todo")]
+#[serde(rename_all = "camelCase")]
+struct TodoDef {
+    title: String,
+    line_number: u32,
+    #[serde(with = "utc_date_format")]
+    ts_indexed: DateTime<Utc>,
+    #[serde(with = "StatusDef")]
+    status: Status,
+    #[serde(with = "optional_naive_date_format")]
+    due_date: Option<NaiveDate>,
+    project: String,
+}
+
+#[derive(Serialize, Deserialize)]
+#[serde(remote = "Status")]
+enum StatusDef {
     #[serde(rename = "open")]
     Open,
     #[serde(rename = "closed")]
     Closed,
 }
 
-#[derive(Serialize, Deserialize)]
-pub struct Todo {
-    pub title: String,
-    #[serde(rename = "lineNumber")]
-    pub line_number: u32,
-    #[serde(rename = "tsIndexed")]
-    pub ts_indexed: u64,
-    pub status: Status,
-    #[serde(rename = "dueDate")]
-    pub due_date: Option<u64>,
-}
+#[derive(Serialize, Debug, Deserialize)]
+struct TodoWrapper(#[serde(with = "TodoDef")] Todo);
 
 #[wasm_bindgen]
 pub struct TodoStore {
-    todos_map: HashMap<String, Vec<Todo>>,
+    todos_map: HashMap<String, Vec<TodoWrapper>>,
 }
 
 #[wasm_bindgen]
@@ -45,7 +52,7 @@ impl TodoStore {
     }
 
     pub fn set_item(&mut self, key: &str, value: &JsValue) -> Result<(), JsError> {
-        let todos: Vec<Todo> = match value.into_serde() {
+        let todos: Vec<TodoWrapper> = match value.into_serde() {
             Ok(todo) => todo,
             Err(err) => return Err(JsError::from(&err)),
         };

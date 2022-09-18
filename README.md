@@ -3,12 +3,12 @@
 ## Run
 
 1. In `./xotodo-edit`, run `trunk build`.
-2. In `./xotodo-parser` and `./xotodo-store`. run `wasm-pack build target --web`.
+2. In `./xotodo-parser` and `./xotodo-store`. run `wasm-pack build --target web`.
 3. `deno bundle --config web/deno.json web/main.ts web/lib/bundle.js`
 4. Start the system: 
 
 ```
-deno run --allow-read --allow-run --allow-write --allow-net --watch main.ts
+deno run --allow-all --watch main.ts
 ```
 
 ## Test
@@ -21,17 +21,10 @@ Alternatively, navigate to a rust crate and run `cargo test`
 ## Compile
 
 ```
-deno compile --allow-read --allow-write --allow-run --allow-net main.ts
+deno compile --allow-all --cached-only main.ts
 ```
 
 Currently doesn't work: https://github.com/denoland/deno/issues/10693
-
-## Compile Rust Components
-
-```
-cd xotodo-edit
-trunk build
-```
 
 ## Debug in Firefox
 ``` 
@@ -42,7 +35,6 @@ Next, use the debugger in VS Code
 
 ### BACKLOG
 - Inline (in-browser) editing of todos 
-- @topic
 - GitHub issues integration
 - "my focus for today" - high-level goals to focus on today
 - extension: @due: data auto-complete

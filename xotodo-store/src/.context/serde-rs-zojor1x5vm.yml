@@ -1,0 +1,11 @@
+id: zojor1x5vm
+timestamp: 2022-09-18T10:08:16.084Z
+author: unknown
+path: https://serde.rs/custom-date-format.html
+fsScope: optional_naive_date_format.rs
+granularity: code-granularity
+code: >-
+  pub fn serialize<S>(date: &Option<NaiveDate>, serializer: S) -> Result<S::Ok,
+  S::Error>
+
+  where
