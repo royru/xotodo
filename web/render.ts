@@ -19,18 +19,16 @@ export function renderOpenTodos(todoDict: TodoDict) {
 
   const todayStr = getDateStr(new Date())
 
-  console.log(todos.filter(([_, todo]) => todo.title.startsWith('Grade samuel')))
-
   const today = todos
     .filter(([_, todo]) => todo.dueDate && getDateStr(todo.dueDate) === todayStr)
 
   const overdue = todos
     .filter(([_, todo]) => todo.dueDate && getDateStr(todo.dueDate) < todayStr)
-    .sort(([_, a], [__, b]) => new Date(a.dueDate!).getTime() - new Date(b.dueDate!).getTime())
+    .sort(([_, a], [__, b]) => new Date(b.dueDate!).getTime() - new Date(a.dueDate!).getTime())
 
   const upcoming = todos
     .filter(([_, todo]) => todo.dueDate && getDateStr(todo.dueDate) > todayStr)
-    .sort(([_, a], [__, b]) => new Date(b.dueDate!).getTime() - new Date(a.dueDate!).getTime())
+    .sort(([_, a], [__, b]) => new Date(a.dueDate!).getTime() - new Date(b.dueDate!).getTime())
 
   const noDueDates = todos
     .filter(([_, todo]) => !todo.dueDate)
@@ -107,7 +105,7 @@ function h3(text: string) {
   return n
 }
 
-function getDateStr(date: Date | number) {
+function getDateStr(date: Date | string) {
   const d = new Date(date)
   // leftpad
   const month = d.getMonth() + 1 < 10 ? `0${d.getMonth() + 1}` : d.getMonth() + 1

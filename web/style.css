@@ -24,7 +24,8 @@ h3 {
 #no-due-date .text {
   font-size: 14px;
   font-weight: normal;
-  max-height: 20px;
+  max-height: 33px;
+  display: inline-block;
   overflow: hidden;
   text-overflow: ellipsis;
 }
