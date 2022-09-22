@@ -58,9 +58,9 @@ export async function watch(onUpdate: (todos: Todo[], path: string) => void) {
       try {
         const text = await Deno.readTextFile(path)
         const todos = parseFile(text, path)
-        console.log("parsed", path, todos)
+        console.log("parsed", path)
         onUpdate(todos, path)
-      } catch (err) {
+      } catch (_) {
         console.error(`parsing failed for ${path}`)
       }
     }

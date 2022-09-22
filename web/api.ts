@@ -1,4 +1,4 @@
-import { Todo } from "../file-parser.ts"
+import { Todo } from "../todo.ts"
 
 type Path = string
 export type TodoDict = Record<Path, Todo[]>

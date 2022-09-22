@@ -1,4 +1,4 @@
-import { Todo } from "../file-parser.ts"
+import { Todo } from "../todo.ts"
 import { TodoDict } from "./api.ts"
 
 const dueDateDiv = document.querySelector('#due-date')!
@@ -54,6 +54,7 @@ export function renderOpenTodos(todoDict: TodoDict) {
 
 
 function renderSection(todos: [string, Todo][], wrapper: any, cls: string) {
+  let lastProjectName = ''
   for (const [filePath, todo] of todos) {
     // let shortened = filePath.replace(/\/Users\/roy\//, '~/')
     // shortened = shortened.replace(/\/Volumes\/GoogleDrive\/My Drive\/|\/Volumes\/Google Drive\/My Drive\//, 'GD:')
@@ -62,14 +63,19 @@ function renderSection(todos: [string, Todo][], wrapper: any, cls: string) {
     url.search = new URLSearchParams({ path: filePath, line: todo.lineNumber.toString() }).toString()
 
     const pathNode = a(`${filePath}#${todo.lineNumber}`, url.toString(), 'edit', '_blank')
+    const projectNode = span(`@${todo.project}`, 'project')
 
     if (todo.dueDate) {
       const dateStr = new Date(getDateStr(todo.dueDate))
       const todayStr = new Date(getDateStr(new Date()))
       const daysOverdue = ((dateStr.getTime() - todayStr.getTime()) / (60 * 60 * 24 * 1000)).toString()
-      wrapper.appendChild(div(span(todo.title, 'text'), pathNode, span(daysOverdue, "date " + cls)))
+      wrapper.appendChild(div(span(todo.title, 'text'), projectNode, pathNode, span(daysOverdue, "date " + cls)))
 
     } else {
+      if (todo.project != lastProjectName) {
+        wrapper.appendChild(h3(`@${todo.project}`))
+        lastProjectName = todo.project
+      }
       wrapper.appendChild(div(span(todo.title, 'text'), pathNode))
     }
   }

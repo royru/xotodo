@@ -1,0 +1,7 @@
+id: 9oqynijt9wi
+timestamp: 2022-09-22T18:23:35.183Z
+author: unknown
+path: https://css-tricks.com/snippets/css/complete-guide-grid/
+fsScope: style.css
+granularity: code-granularity
+code: "  grid-auto-rows: 64px;"
