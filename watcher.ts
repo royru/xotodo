@@ -1,5 +1,6 @@
 import { exists } from "https://deno.land/std/fs/mod.ts"
-import { parseFile, Todo } from "./file-parser.ts"
+import { parseFile } from "./file-parser.ts"
+import { Todo } from "./todo.ts"
 import { removeTodosForPath } from "./store.ts"
 
 let currentGoogleDrivePath = ''
