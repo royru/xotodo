@@ -23,6 +23,7 @@ struct TodoDef {
     #[serde(with = "optional_naive_date_format")]
     due_date: Option<NaiveDate>,
     project: String,
+    file_path: String,
 }
 
 #[derive(Serialize, Deserialize)]

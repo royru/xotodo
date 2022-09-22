@@ -1,5 +1,5 @@
 // boilerplate script to migrate outdated data structure to an updated one - run if needed:
-// deno run --allow-read --allow-write  store-mirgration.ts
+// deno run --allow-read --allow-write scripts/store-migration.ts
 
 import { Todo } from "../file-parser.ts"
 
@@ -8,15 +8,18 @@ type filename = string
 const pad = (n: number) => n.toString().padStart(2, "0")
 const todoRec: Record<filename, Todo[]> = JSON.parse(await Deno.readTextFile("/Users/roy/Desktop/xo.todo"))
 
-Object.entries(todoRec).forEach(([_, todos]) => {
+Object.entries(todoRec).forEach(([fp, todos]) => {
   todos.forEach(todo => {
-    if (todo.dueDate) {
-      todo.dueDate = toNaiveDateStr(new Date(todo.dueDate))
-    } else {
-      todo.dueDate = ""
+    // if (todo.dueDate) {
+    //   todo.dueDate = toNaiveDateStr(new Date(todo.dueDate))
+    // } else {
+    //   todo.dueDate = ""
+    // }
+    // todo.tsIndexed = toNaiveDateTimeStr(new Date(todo.tsIndexed))
+    // todo.project = "" 
+    if (!todo.filePath) {
+      todo.filePath = fp
     }
-    todo.tsIndexed = toNaiveDateTimeStr(new Date(todo.tsIndexed))
-    todo.project = "" // OTODO: migrate the project field 
   })
 })
 

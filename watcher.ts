@@ -37,12 +37,8 @@ export const WATCHED_FOLDERS = [`${currentGoogleDrivePath}/My Drive/Research`, "
 export const IGNORED_PATH_SEGMENTS = ["/xotodo", "/Library", "/.", "/xo.todo", "/Music/"]
 
 export async function watch(onUpdate: (todos: Todo[], path: string) => void) {
-
-  const decoder = new TextDecoder("utf-8")
   const watcher = Deno.watchFs(WATCHED_FOLDERS)
-
   for await (const event of watcher) {
-
     if (event.paths.length == 0) {
       continue
     }
@@ -60,13 +56,12 @@ export async function watch(onUpdate: (todos: Todo[], path: string) => void) {
       }
 
       try {
-        const data = await Deno.readFile(path)
-        const text = decoder.decode(data)
+        const text = await Deno.readTextFile(path)
         const todos = parseFile(text, path)
-        console.log("parsed", path)
+        console.log("parsed", path, todos)
         onUpdate(todos, path)
       } catch (err) {
-        console.error(`parsing failed for ${path}:`, err)
+        console.error(`parsing failed for ${path}`)
       }
     }
   }

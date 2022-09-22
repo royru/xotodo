@@ -20,6 +20,7 @@ pub struct Todo {
     pub status: Status,
     pub due_date: Option<NaiveDate>,
     pub project: String,
+    pub file_path: String,
 }
 
 pub fn parse_todo(content: &str, file_path: &str) -> Result<Vec<Todo>, ParseError> {
@@ -58,7 +59,8 @@ pub fn parse_todo(content: &str, file_path: &str) -> Result<Vec<Todo>, ParseErro
                 line_number: (i + 1) as u32,
                 ts_indexed: Utc::now(),
                 due_date,
-                project: file_path.to_string(), // OTODO: need to parse project
+                file_path: file_path.to_string(),
+                project: "".to_string(),
             };
             todos.push(todo)
         }
@@ -66,9 +68,44 @@ pub fn parse_todo(content: &str, file_path: &str) -> Result<Vec<Todo>, ParseErro
     Ok(todos)
 }
 
+// OTODO: currently not feasible with wasm-bindgen
+// fn parse_project(file_path: &str) -> String {
+//     let path = Path::new(file_path);
+//     let first_parent = path.parent().unwrap();
+//     let mut cur_parent = first_parent;
+//     loop {
+//         let parent_str = cur_parent.to_str().unwrap();
+//         let mut git_dir = parent_str.to_string();
+//         git_dir.push_str("/.git");
+//         if Path::new(&git_dir).exists() {
+//             // we found a .git repo
+//             let parts: Vec<&str> = parent_str.split("/").collect();
+//             return parts[parts.len() - 1].to_string();
+//         }
+
+//         match cur_parent.parent() {
+//             None => {
+//                 // no more parents, so current file is not part of a git repo.
+//                 // project name defaults to the parent folder
+//                 let parts: Vec<&str> = first_parent.to_str().unwrap().split("/").collect();
+//                 return parts[parts.len() - 1].to_string();
+//             }
+//             Some(p) => cur_parent = p,
+//         }
+//     }
+// }
+
 #[cfg(test)]
 mod tests {
     use crate::parse_todo;
+
+    // #[test]
+    // fn project() {
+    //     let dir = env::current_dir().unwrap();
+    //     let project = parse_project(dir.to_str().unwrap());
+    //     println!("{}", project);
+    //     assert_eq!(project, "xotodo")
+    // }
 
     #[test]
     fn valid_todos() {
