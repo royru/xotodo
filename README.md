@@ -37,6 +37,7 @@ Next, use the debugger in VS Code
 - Inline (in-browser) editing of todos 
 - GitHub issues integration
 - "my focus for today" - high-level goals to focus on today
-- extension: @due: data auto-complete
-- sort user interface either by topic, folder or dueDate
-- extract all hard-coded filepaths and make it configurable
+- extension: @due: data auto-complete: *this* friday, *next* friday, +5 (in 5 days...)
+- @created auto-generated
+- @project to overwrite default.
+- click the due-date number to increase it by +1 (postpone by a day)

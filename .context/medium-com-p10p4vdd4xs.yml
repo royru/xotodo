@@ -1,0 +1,7 @@
+id: p10p4vdd4xs
+timestamp: 2022-09-18T15:20:07.595Z
+author: unknown
+path: https://medium.com/deno-the-complete-reference/run-shell-commands-in-deno-26c3e9b72e03
+fsScope: github.ts
+granularity: code-granularity
+code: "      const data = JSON.parse(res)"

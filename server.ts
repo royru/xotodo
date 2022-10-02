@@ -1,12 +1,13 @@
 import { Application, Router, helpers } from "https://deno.land/x/oak/mod.ts"
 import { getStringifiedTodos } from "./store.ts"
+import config from "./xotodo.config.json" assert { type: "json" }
 
 const app = new Application()
 const router = new Router()
 
 export function initServer() {
-  app.listen({ port: 8000 })
-  console.log('Listening on http://localhost:8000')
+  app.listen({ port: config.port })
+  console.log(`Listening on http://localhost:${config.port}`)
 }
 
 app.use(async (context, next) => {
@@ -56,11 +57,6 @@ router
       console.error("Invalid line number. No OTODO found.")
       Deno.exit()
     }
-    // console.log(ctx.request.hasBody)
-    // const res = ctx.request.body()
-    // console.log(res.type)
-    // console.log(await res.value)
-    // ctx.response.body = "ok"
   })
 
 app.use(router.routes())

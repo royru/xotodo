@@ -56,9 +56,6 @@ export function renderOpenTodos(todoDict: TodoDict) {
 function renderSection(todos: [string, Todo][], wrapper: any, cls: string) {
   let lastProjectName = ''
   for (const [filePath, todo] of todos) {
-    // let shortened = filePath.replace(/\/Users\/roy\//, '~/')
-    // shortened = shortened.replace(/\/Volumes\/GoogleDrive\/My Drive\/|\/Volumes\/Google Drive\/My Drive\//, 'GD:')
-
     const url = new URL('edit', location.origin)
     url.search = new URLSearchParams({ path: filePath, line: todo.lineNumber.toString() }).toString()
 

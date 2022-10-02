@@ -1,6 +1,7 @@
-import { Todo } from "./file-parser.ts"
-import { existsFixed, IGNORED_PATH_SEGMENTS, WATCHED_FOLDERS } from "./watcher.ts"
+import { Todo } from "./todo.ts"
+import config from './xotodo.config.json' assert { type: "json" }
 import { TodoStore } from "./xotodo-store/pkg/xotodo_store.js"
+import { exists } from "https://deno.land/std@0.114.0/fs/exists.ts"
 
 let store: TodoStore
 type Path = string
@@ -27,7 +28,7 @@ export function getStringifiedTodos(): string {
 
   for (let [path, todos] of Object.entries(todoDict)) {
     todos = todos.map(todo => {
-      for (const _dir of WATCHED_FOLDERS) {
+      for (const _dir of config.watchedFolders) {
         todo.filePath = path
       }
       return todo
@@ -51,11 +52,11 @@ export async function initialiseStore() {
     store.set_item(path, data[path])
 
     // cleanup in case that a new ignored path segment was added
-    if (IGNORED_PATH_SEGMENTS.some(segment => path.includes(segment))) {
+    if (config.ignoredPathSegments.some(segment => path.includes(segment))) {
       console.log(`removing ignored path: ${path}`)
       removeTodosForPath(path)
     }
-    else if (! await existsFixed(path)) {
+    else if (! await exists(path)) {
       console.log(`removing non-existing path: ${path}`)
       removeTodosForPath(path)
     }
@@ -64,7 +65,7 @@ export async function initialiseStore() {
 
 async function read(): Promise<TodoDict> {
   try {
-    const data = await Deno.readTextFile("/Users/roy/Desktop/xo.todo")
+    const data = await Deno.readTextFile(config.todoFileName)
     return JSON.parse(data)
   } catch (error) {
     console.error(error)
@@ -74,7 +75,5 @@ async function read(): Promise<TodoDict> {
 
 async function write() {
   const todos: TodoDict = store.get_items()
-  const encoder = new TextEncoder()
-  const data = encoder.encode(JSON.stringify(todos))
-  await Deno.writeFile("/Users/roy/Desktop/xo.todo", data)
+  await Deno.writeTextFile(config.todoFileName, JSON.stringify(todos))
 }
