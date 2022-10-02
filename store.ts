@@ -1,7 +1,6 @@
 import { Todo } from "./todo.ts"
 import config from './xotodo.config.json' assert { type: "json" }
 import { TodoStore } from "./xotodo-store/pkg/xotodo_store.js"
-import { exists } from "https://deno.land/std@0.114.0/fs/exists.ts"
 
 let store: TodoStore
 type Path = string
@@ -56,9 +55,15 @@ export async function initialiseStore() {
       console.log(`removing ignored path: ${path}`)
       removeTodosForPath(path)
     }
-    else if (! await exists(path)) {
-      console.log(`removing non-existing path: ${path}`)
-      removeTodosForPath(path)
+
+    try {
+      // throw error if file doesn't exist
+      await Deno.stat(path)
+    } catch (e) {
+      if (e instanceof Deno.errors.NotFound) {
+        console.log(`removing non-existing path: ${path}`)
+        removeTodosForPath(path)
+      }
     }
   }
 }

@@ -1,5 +1,4 @@
-// import { v1 } from "https://deno.land/std@0.91.0/uuid/mod.ts"
-import * as path from "https://deno.land/std/path/mod.ts"
+import * as path from "https://deno.land/std@0.130.0/path/mod.ts"
 import { Todo } from "./todo.ts"
 import { parse } from "./xotodo-parser/pkg/xotodo_parser.js"
 

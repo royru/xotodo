@@ -1,0 +1,16 @@
+id: c8cdqy52dpj
+timestamp: 2022-10-02T18:57:24.563Z
+author: Roy Rutishauser
+path: https://medium.com/deno-the-complete-reference/deno-nuggets-check-if-a-file-exists-54da2a9e5153
+fsScope: store.ts
+granularity: code-granularity
+code: |-2
+      try {
+        // throw error if file doesn't exist
+        await Deno.stat(path)
+      } catch (e) {
+        if (e instanceof Deno.errors.NotFound) {
+          console.log(`removing non-existing path: ${path}`)
+          removeTodosForPath(path)
+        }
+      }

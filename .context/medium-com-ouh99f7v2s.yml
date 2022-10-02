@@ -1,0 +1,7 @@
+id: ouh99f7v2s
+timestamp: 2022-10-02T18:53:44.443Z
+author: Roy Rutishauser
+path: https://medium.com/deno-the-complete-reference/deno-nuggets-check-if-a-file-exists-54da2a9e5153
+fsScope: watcher.ts
+granularity: code-granularity
+code: "        await Deno.stat(path)"

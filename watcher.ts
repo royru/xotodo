@@ -1,4 +1,3 @@
-import { exists } from "https://deno.land/std/fs/mod.ts"
 import { parseFile } from "./file-parser.ts"
 import { Todo } from "./todo.ts"
 import { removeTodosForPath } from "./store.ts"
@@ -12,15 +11,17 @@ export async function watch(onUpdate: (todos: Todo[], path: string) => void) {
     }
 
     for (const path of event.paths) {
-      if (config.ignoredPathSegments.some(segment => path.includes(segment))) {
-        // ignore
-        continue
-      }
+      if (config.ignoredPathSegments.some(segment => path.includes(segment))) { continue }
 
-      if (!await exists(path)) {
-        removeTodosForPath(path)
-        onUpdate([], path)
-        continue
+      try {
+        // throws an error if the file is not found
+        await Deno.stat(path)
+      } catch (e) {
+        if (e instanceof Deno.errors.NotFound) {
+          removeTodosForPath(path)
+          onUpdate([], path)
+          continue
+        }
       }
 
       try {

@@ -1,4 +1,4 @@
-import { Application, Router, helpers } from "https://deno.land/x/oak/mod.ts"
+import { Application, Router, helpers } from "https://deno.land/x/oak@v10.5.1/mod.ts"
 import { getStringifiedTodos } from "./store.ts"
 import config from "./xotodo.config.json" assert { type: "json" }
 
