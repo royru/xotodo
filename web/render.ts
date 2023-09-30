@@ -1,5 +1,5 @@
 import { Todo } from "../todo.ts"
-import { TodoDict } from "./api.ts"
+import { completeTodo, incrementDueDate, openFile, TodoDict } from "./api.ts"
 
 const dueDateDiv = document.querySelector('#due-date')!
 const noDueDateDiv = document.querySelector('#no-due-date')!
@@ -52,8 +52,7 @@ export function renderOpenTodos(todoDict: TodoDict) {
   }
 }
 
-
-function renderSection(todos: [string, Todo][], wrapper: any, cls: string) {
+function renderSection(todos: [string, Todo][], wrapper: Element, cls: string) {
   let lastProjectName = ''
   for (const [filePath, todo] of todos) {
     const url = new URL('edit', location.origin)
@@ -61,12 +60,15 @@ function renderSection(todos: [string, Todo][], wrapper: any, cls: string) {
 
     const pathNode = a(`${filePath}#${todo.lineNumber}`, url.toString(), 'edit', '_blank')
     const projectNode = span(`@${todo.project}`, 'project')
+    const completeBtn = button('✓', () => { completeTodo(filePath, todo.lineNumber) }, "complete")
+    const openBtn = button('open', () => { openFile(filePath) }, "open")
 
     if (todo.dueDate) {
       const dateStr = new Date(getDateStr(todo.dueDate))
       const todayStr = new Date(getDateStr(new Date()))
       const daysOverdue = ((dateStr.getTime() - todayStr.getTime()) / (60 * 60 * 24 * 1000)).toString()
-      wrapper.appendChild(div(span(todo.title, 'text'), projectNode, pathNode, span(daysOverdue, "date " + cls)))
+      const dueDateNode = button(daysOverdue, () => { incrementDueDate(filePath, todo.lineNumber) }, "date " + cls)
+      wrapper.appendChild(div(span(todo.title, 'text'), completeBtn, openBtn, projectNode, pathNode, dueDateNode))
 
     } else {
       if (todo.project != lastProjectName) {
@@ -93,6 +95,15 @@ function span(text: string, className = '') {
   return n
 }
 
+function button(text: string, cb: eventCbType, className?: string): HTMLButtonElement {
+  const b = document.createElement("button")
+  b.textContent = text
+  if (className) { b.className = className }
+  b.addEventListener("click", cb)
+  return b
+}
+
+
 function a(text: string, link: string, className = '', target = '') {
   const n = document.createElement('a')
   n.textContent = text
@@ -114,4 +125,8 @@ function getDateStr(date: Date | string) {
   const month = d.getMonth() + 1 < 10 ? `0${d.getMonth() + 1}` : d.getMonth() + 1
   const day = d.getDate() < 10 ? `0${d.getDate()}` : d.getDate()
   return `${d.getFullYear()}-${month}-${day}`
+}
+
+interface eventCbType {
+  (evt: MouseEvent): void
 }

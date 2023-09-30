@@ -44,7 +44,36 @@ router
       Deno.exit()
     }
   })
-  .post("/api/complete", (ctx) => {
+  .get("/api/open", (ctx) => {
+    const { path } = helpers.getQuery(ctx)
+    Deno.run({ cmd: ["open", path] })
+    ctx.response.body = "ok"
+  })
+  .get("/api/increment", (ctx) => {
+    const { path, line } = helpers.getQuery(ctx)
+    const content = Deno.readTextFileSync(path)
+    const lines = content.split('\n')
+    const index = Number.parseInt(line)
+    // example line would be "OTODO: this is a test @due: 2021-03-01 by midnight"
+    if (lines.length >= index && lines[index].includes('@due:')) {
+      try {
+        const dueDateStr = lines[index].split('@due:')[1].trim().substring(0, 10)
+        const dueDate = new Date(dueDateStr)
+        dueDate.setDate(dueDate.getDate() + 1)
+        const newDueDateStr = dueDate.toISOString().substring(0, 10)
+        lines[index] = lines[index].replace(dueDateStr, newDueDateStr)
+        Deno.writeTextFileSync(path, lines.join('\n'))
+        ctx.response.body = "ok"
+      } catch (error) {
+        console.error("Invalid date.", error)
+        Deno.exit()
+      }
+    } else {
+      console.error("Invalid line number. No @due: found.")
+      Deno.exit()
+    }
+  })
+  .get("/api/complete", (ctx) => {
     const { path, line } = helpers.getQuery(ctx)
     const content = Deno.readTextFileSync(path)
     const lines = content.split('\n')

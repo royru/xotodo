@@ -191,7 +191,7 @@ async fn set_todo_completed(line_number: usize, file_path: String) {
         line_number.to_string()
     ));
 
-    Box::new(Request::post(url.as_str())).send().await.unwrap();
+    Box::new(Request::get(url.as_str())).send().await.unwrap();
 }
 
 async fn remove_todo(line_number: usize, file_path: String) {

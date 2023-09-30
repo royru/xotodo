@@ -103,3 +103,8 @@ span.project {
 .today.date {
   background-color: blue;
 }
+
+button {
+  border: none;
+  cursor: pointer;
+}
